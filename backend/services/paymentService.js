@@ -6,8 +6,9 @@ const { razorpay, isConfigured } = require('../config/razorpay');
 const createRazorpayOrder = async (bookingId, amountUSD) => {
   // Convert USD to INR sub-units (1 USD = 83 INR, and Razorpay expects paise: * 100)
   const amountPaise = Math.round(amountUSD * 83 * 100);
+  const forceMock = process.env.USE_MOCK_PAYMENTS === 'true';
 
-  if (isConfigured && razorpay) {
+  if (!forceMock && isConfigured && razorpay) {
     const options = {
       amount: amountPaise,
       currency: 'INR',
@@ -35,7 +36,9 @@ const createRazorpayOrder = async (bookingId, amountUSD) => {
 
 // Verify Payment Signature
 const verifyPaymentSignature = (orderId, paymentId, signature) => {
-  if (!isConfigured) {
+  const forceMock = process.env.USE_MOCK_PAYMENTS === 'true';
+
+  if (forceMock || !isConfigured) {
     // In mock mode, validate successfully if a mock payment ID is provided
     return !!(paymentId && paymentId.startsWith('pay_'));
   }
