@@ -38,7 +38,7 @@ export default function AdminReviews() {
     <div className="min-h-screen bg-cream/30 flex">
       <AdminSidebar />
 
-      <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
+      <div className="flex-1 lg:pl-64 flex flex-col min-h-screen min-w-0">
         <AdminNavbar />
 
         <main className="flex-1 p-6 md:p-8 space-y-6 max-w-[1240px] mx-auto w-full">
