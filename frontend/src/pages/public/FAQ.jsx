@@ -25,7 +25,7 @@ export default function FAQ() {
     {
       topic: 'Refunds',
       question: 'When will I receive my refund after cancellation?',
-      answer: 'Once a cancellation request is submitted, refunds are processed immediately. The funds will reflect in your account within 5 to 7 business days, depending on your bank.'
+      answer: 'For cancellation refunds, please reach out directly to our support helpline or message us on WhatsApp at +91 99999-99999. Please share your Booking Reference ID, and our team will verify your details and process your refund immediately.'
     },
     {
       topic: 'Check-in',
