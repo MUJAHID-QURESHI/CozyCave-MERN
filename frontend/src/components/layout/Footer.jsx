@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import { Instagram, Mail, Phone } from 'lucide-react';
 import Logo from './Logo';
 
 const WhatsappIcon = ({ size = 16 }) => (
@@ -11,7 +11,8 @@ const WhatsappIcon = ({ size = 16 }) => (
 );
 
 export default function Footer() {
-  const { supportEmail, supportPhone, supportAddress, whatsappLink } = useSelector((state) => state.settings);
+  const { supportEmail, supportPhone, supportPhones = [], whatsappLink } = useSelector((state) => state.settings);
+  const phonesToDisplay = supportPhones && supportPhones.length > 0 ? supportPhones : (supportPhone ? [supportPhone] : []);
 
   return (
     <footer className="bg-forest-dark text-[#F7F5EF]/70 py-16 px-6 md:px-12 border-t border-line">
@@ -73,18 +74,18 @@ export default function Footer() {
           <div>
             <h5 className="text-white text-[14.5px] font-semibold mb-5 font-inter">Contact</h5>
             <ul className="flex flex-col gap-3 text-[13.5px]">
-              <li className="flex items-start gap-2.5">
-                <MapPin size={16} className="text-gold mt-0.5 flex-shrink-0" />
-                <span>{supportAddress}</span>
-              </li>
               <li className="flex items-center gap-2.5">
                 <Mail size={16} className="text-gold flex-shrink-0" />
-                <span>{supportEmail}</span>
+                <a href={`mailto:${supportEmail}`} className="hover:text-white transition-colors">{supportEmail}</a>
               </li>
-              <li className="flex items-center gap-2.5">
-                <Phone size={16} className="text-gold flex-shrink-0" />
-                <span>{supportPhone}</span>
-              </li>
+              {phonesToDisplay.map((ph, idx) => (
+                <li key={idx} className="flex items-center gap-2.5">
+                  <Phone size={16} className="text-gold flex-shrink-0" />
+                  <a href={`tel:${ph.replace(/[^+\d]/g, '')}`} className="hover:text-white transition-colors">
+                    {ph}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 

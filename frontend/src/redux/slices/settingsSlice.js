@@ -29,7 +29,7 @@ const initialState = {
   portalName: 'The Cozy Cave',
   supportEmail: 'hello@thecozycave.com',
   supportPhone: '+1 (828) 555-0173',
-  supportAddress: '148 Harbor Lane, Asheville, NC',
+  supportPhones: ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175'],
   whatsappLink: 'https://wa.me/18285550173',
   taxPercent: 6,
   serviceFeePercent: 8,
@@ -52,8 +52,10 @@ const settingsSlice = createSlice({
         if (action.payload) {
           state.portalName = action.payload.portalName || state.portalName;
           state.supportEmail = action.payload.supportEmail || state.supportEmail;
-          state.supportPhone = action.payload.supportPhone || state.supportPhone;
-          state.supportAddress = action.payload.supportAddress || state.supportAddress;
+          state.supportPhones = action.payload.supportPhones && action.payload.supportPhones.length > 0
+            ? action.payload.supportPhones
+            : (action.payload.supportPhone ? [action.payload.supportPhone] : state.supportPhones);
+          state.supportPhone = state.supportPhones[0] || state.supportPhone;
           state.whatsappLink = action.payload.whatsappLink || state.whatsappLink;
           state.taxPercent = action.payload.taxPercent !== undefined ? action.payload.taxPercent : state.taxPercent;
           state.serviceFeePercent = action.payload.serviceFeePercent !== undefined ? action.payload.serviceFeePercent : state.serviceFeePercent;
@@ -72,8 +74,10 @@ const settingsSlice = createSlice({
         if (action.payload) {
           state.portalName = action.payload.portalName;
           state.supportEmail = action.payload.supportEmail;
-          state.supportPhone = action.payload.supportPhone;
-          state.supportAddress = action.payload.supportAddress;
+          state.supportPhones = action.payload.supportPhones && action.payload.supportPhones.length > 0
+            ? action.payload.supportPhones
+            : (action.payload.supportPhone ? [action.payload.supportPhone] : state.supportPhones);
+          state.supportPhone = state.supportPhones[0] || state.supportPhone;
           state.whatsappLink = action.payload.whatsappLink;
           state.taxPercent = action.payload.taxPercent;
           state.serviceFeePercent = action.payload.serviceFeePercent;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Save, Shield, Settings } from 'lucide-react';
+import { Save, Shield, Settings, Phone, Plus, Trash2 } from 'lucide-react';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
 import { fetchPortalSettings, savePortalSettings } from '../../redux/slices/settingsSlice';
@@ -12,8 +12,7 @@ export default function AdminSettings() {
   const { 
     portalName: reduxName, 
     supportEmail: reduxEmail, 
-    supportPhone: reduxPhone, 
-    supportAddress: reduxAddress,
+    supportPhones: reduxPhones = [],
     whatsappLink: reduxWhatsapp,
     taxPercent: reduxTax, 
     serviceFeePercent: reduxFee, 
@@ -22,8 +21,9 @@ export default function AdminSettings() {
 
   const [portalName, setPortalName] = useState(reduxName);
   const [supportEmail, setSupportEmail] = useState(reduxEmail);
-  const [supportPhone, setSupportPhone] = useState(reduxPhone);
-  const [supportAddress, setSupportAddress] = useState(reduxAddress);
+  const [supportPhones, setSupportPhones] = useState(
+    reduxPhones.length > 0 ? reduxPhones : ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175']
+  );
   const [whatsappLink, setWhatsappLink] = useState(reduxWhatsapp);
   const [taxPercent, setTaxPercent] = useState(reduxTax);
   const [serviceFeePercent, setServiceFeePercent] = useState(reduxFee);
@@ -33,22 +33,47 @@ export default function AdminSettings() {
   useEffect(() => {
     setPortalName(reduxName);
     setSupportEmail(reduxEmail);
-    setSupportPhone(reduxPhone);
-    setSupportAddress(reduxAddress);
+    if (reduxPhones && reduxPhones.length > 0) {
+      setSupportPhones(reduxPhones);
+    }
     setWhatsappLink(reduxWhatsapp);
     setTaxPercent(reduxTax);
     setServiceFeePercent(reduxFee);
     setMaintenanceMode(reduxMaintenance);
-  }, [reduxName, reduxEmail, reduxPhone, reduxAddress, reduxWhatsapp, reduxTax, reduxFee, reduxMaintenance]);
+  }, [reduxName, reduxEmail, reduxPhones, reduxWhatsapp, reduxTax, reduxFee, reduxMaintenance]);
+
+  const handlePhoneChange = (index, value) => {
+    const updated = [...supportPhones];
+    updated[index] = value;
+    setSupportPhones(updated);
+  };
+
+  const handleAddPhone = () => {
+    setSupportPhones([...supportPhones, '']);
+  };
+
+  const handleRemovePhone = (index) => {
+    if (supportPhones.length <= 1) {
+      dispatch(addToast({ message: 'At least one hotline number is required', type: 'warning' }));
+      return;
+    }
+    setSupportPhones(supportPhones.filter((_, i) => i !== index));
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
+    const cleanedPhones = supportPhones.map(p => p.trim()).filter(Boolean);
+    if (cleanedPhones.length === 0) {
+      dispatch(addToast({ message: 'Please provide at least one hotline phone number', type: 'warning' }));
+      return;
+    }
+
     try {
       await dispatch(savePortalSettings({
         portalName,
         supportEmail,
-        supportPhone,
-        supportAddress,
+        supportPhone: cleanedPhones[0],
+        supportPhones: cleanedPhones,
         whatsappLink,
         taxPercent,
         serviceFeePercent,
@@ -64,7 +89,7 @@ export default function AdminSettings() {
     <div className="min-h-screen bg-cream/30 flex">
       <AdminSidebar />
 
-      <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
+      <div className="flex-1 lg:pl-64 flex flex-col min-h-screen min-w-0">
         <AdminNavbar />
 
         <main className="flex-1 p-6 md:p-8 space-y-6 max-w-[800px] mx-auto w-full">
@@ -105,41 +130,67 @@ export default function AdminSettings() {
                 </div>
               </div>
 
-              {/* Added support phone and WhatsApp link inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">Support Hotline Phone</label>
-                  <input 
-                    type="text" 
-                    value={supportPhone}
-                    onChange={(e) => setSupportPhone(e.target.value)}
-                    className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none"
-                    required
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">WhatsApp Link URL</label>
-                  <input 
-                    type="text" 
-                    value={whatsappLink}
-                    onChange={(e) => setWhatsappLink(e.target.value)}
-                    className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Added headquarters address support input */}
+              {/* WhatsApp link input */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">Headquarters Support Address</label>
+                <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">WhatsApp Link URL</label>
                 <input 
                   type="text" 
-                  value={supportAddress}
-                  onChange={(e) => setSupportAddress(e.target.value)}
+                  value={whatsappLink}
+                  onChange={(e) => setWhatsappLink(e.target.value)}
                   className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none"
                   required
                 />
+              </div>
+
+              {/* Multiple Support Hotline Phone Numbers */}
+              <div className="flex flex-col gap-3 bg-cream/20 border border-line rounded-2xl p-4 sm:p-5">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <div>
+                    <label className="text-[11.5px] font-bold text-forest-dark uppercase tracking-wider flex items-center gap-1.5">
+                      <Phone size={14} className="text-forest" />
+                      Support Hotline Phone Numbers ({supportPhones.length})
+                    </label>
+                    <span className="text-[11.5px] text-charcoal-soft">Add 2, 3 or more numbers to show in footer and contact page</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddPhone}
+                    className="self-start sm:self-auto px-3 py-1.5 bg-forest hover:bg-forest-light text-white text-[11.5px] font-semibold rounded-lg flex items-center gap-1 transition-colors shadow-sm cursor-pointer"
+                  >
+                    <Plus size={13} />
+                    Add Hotline Number
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-2.5 mt-1">
+                  {supportPhones.map((phone, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-charcoal-soft">
+                          #{idx + 1}
+                        </span>
+                        <input 
+                          type="text" 
+                          value={phone}
+                          placeholder={`Hotline Phone #${idx + 1} (e.g. +1 (828) 555-017${idx + 3})`}
+                          onChange={(e) => handlePhoneChange(idx, e.target.value)}
+                          className="w-full bg-white border border-line rounded-xl py-2.5 pl-10 pr-4 text-[13.5px] text-forest-dark font-medium focus:outline-none focus:border-forest"
+                          required
+                        />
+                      </div>
+                      {supportPhones.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhone(idx)}
+                          className="p-2.5 text-charcoal-soft hover:text-rose-600 hover:bg-rose-50 border border-line rounded-xl transition-colors cursor-pointer"
+                          title="Remove hotline number"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-line pt-4">

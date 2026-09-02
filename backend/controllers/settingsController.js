@@ -10,6 +10,11 @@ const getSettings = async (req, res, next) => {
       // Create default settings row if not exists
       settings = await Settings.create({});
     }
+    if (!settings.supportPhones || settings.supportPhones.length === 0) {
+      settings.supportPhones = settings.supportPhone 
+        ? [settings.supportPhone] 
+        : ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175'];
+    }
     res.status(200).json({
       success: true,
       message: 'Settings fetched successfully',
@@ -31,14 +36,27 @@ const updateSettings = async (req, res, next) => {
     }
 
     const {
-      portalName, supportEmail, supportPhone, supportAddress,
+      portalName, supportEmail, supportPhone, supportPhones, supportAddress,
       whatsappLink, taxPercent, serviceFeePercent, maintenanceMode
     } = req.body;
 
     settings.portalName = portalName !== undefined ? portalName : settings.portalName;
     settings.supportEmail = supportEmail !== undefined ? supportEmail : settings.supportEmail;
-    settings.supportPhone = supportPhone !== undefined ? supportPhone : settings.supportPhone;
-    settings.supportAddress = supportAddress !== undefined ? supportAddress : settings.supportAddress;
+    
+    if (supportPhones !== undefined) {
+      const filtered = Array.isArray(supportPhones)
+        ? supportPhones.map(p => String(p).trim()).filter(Boolean)
+        : [String(supportPhones).trim()].filter(Boolean);
+      if (filtered.length > 0) {
+        settings.supportPhones = filtered;
+        settings.supportPhone = filtered[0];
+      }
+    } else if (supportPhone !== undefined) {
+      settings.supportPhone = supportPhone;
+      settings.supportPhones = [supportPhone];
+    }
+
+    settings.supportAddress = '';
     settings.whatsappLink = whatsappLink !== undefined ? whatsappLink : settings.whatsappLink;
     settings.taxPercent = taxPercent !== undefined ? parseFloat(taxPercent) : settings.taxPercent;
     settings.serviceFeePercent = serviceFeePercent !== undefined ? parseFloat(serviceFeePercent) : settings.serviceFeePercent;
