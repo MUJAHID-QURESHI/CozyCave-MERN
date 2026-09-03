@@ -88,6 +88,50 @@ export const adminUpdateBookingStatus = createAsyncThunk(
   }
 );
 
+export const fetchAdminBookings = createAsyncThunk(
+  'bookings/fetchAdminBookings',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/admin/bookings');
+      const rawBookings = response.data.data || [];
+      return rawBookings.map((b) => {
+        const checkInStr = b.checkIn ? new Date(b.checkIn).toISOString().split('T')[0] : '';
+        const checkOutStr = b.checkOut ? new Date(b.checkOut).toISOString().split('T')[0] : '';
+        const statusCap = b.bookingStatus 
+          ? (b.bookingStatus.charAt(0).toUpperCase() + b.bookingStatus.slice(1).toLowerCase())
+          : 'Pending';
+
+        return {
+          id: b.bookingId || b._id,
+          _id: b._id,
+          bookingId: b.bookingId,
+          propertyName: b.property?.name || 'Vacation Stay',
+          propertyLocation: b.property?.location 
+            ? `${b.property.location.city || ''}${b.property.location.state ? ', ' + b.property.location.state : ''}` 
+            : 'Indore, Madhya Pradesh',
+          propertyImage: b.property?.images?.[0] || 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=600&q=80',
+          userName: b.guestDetails?.name || b.customer?.name || 'Guest',
+          userEmail: b.guestDetails?.email || b.customer?.email || '',
+          userMobile: b.guestDetails?.mobile || b.customer?.mobile || '',
+          checkIn: checkInStr,
+          checkOut: checkOutStr,
+          nights: b.numberOfNights || 1,
+          pricePerNight: b.pricePerNight || 0,
+          cleaningFee: 0,
+          serviceFee: b.serviceFee || 0,
+          totalAmount: b.totalAmount || 0,
+          paymentStatus: b.paymentStatus === 'paid' ? 'Paid' : (b.paymentStatus || 'Pending'),
+          status: statusCap,
+          rawStatus: b.bookingStatus,
+          createdAt: b.createdAt ? new Date(b.createdAt).toISOString().split('T')[0] : '',
+        };
+      });
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch admin bookings');
+    }
+  }
+);
+
 // Backward compatibility exports
 export const deleteBooking = adminDeleteBooking;
 export const updateBookingStatus = adminUpdateBookingStatus;
@@ -157,10 +201,30 @@ const bookingSlice = createSlice({
       })
       // Admin update booking status
       .addCase(adminUpdateBookingStatus.fulfilled, (state, action) => {
-        const idx = state.bookings.findIndex(b => b._id === action.payload._id || b.bookingId === action.payload.bookingId);
+        const idx = state.bookings.findIndex(b => b._id === action.payload._id || b.bookingId === action.payload.bookingId || b.id === action.payload.bookingId || b.id === action.payload._id);
         if (idx !== -1) {
-          state.bookings[idx] = action.payload;
+          const statusCap = action.payload.bookingStatus
+            ? (action.payload.bookingStatus.charAt(0).toUpperCase() + action.payload.bookingStatus.slice(1).toLowerCase())
+            : state.bookings[idx].status;
+          state.bookings[idx] = {
+            ...state.bookings[idx],
+            ...action.payload,
+            status: statusCap,
+          };
         }
+      })
+      // Fetch Admin Bookings
+      .addCase(fetchAdminBookings.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAdminBookings.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bookings = action.payload;
+      })
+      .addCase(fetchAdminBookings.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   }
 });

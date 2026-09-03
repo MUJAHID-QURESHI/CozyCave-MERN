@@ -1,5 +1,5 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { 
   Home, FileText, Calendar, IndianRupee, Users, Award, TrendingUp 
@@ -9,11 +9,19 @@ import {
 } from 'recharts';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
+import { fetchAdminBookings } from '../../redux/slices/bookingSlice';
+import { fetchProperties } from '../../redux/slices/propertySlice';
 import { mockRevenueStats } from '../../data/mockData';
 
 export default function AdminDashboard() {
+  const dispatch = useDispatch();
   const { properties } = useSelector((state) => state.properties);
   const { bookings } = useSelector((state) => state.bookings);
+
+  useEffect(() => {
+    dispatch(fetchAdminBookings());
+    dispatch(fetchProperties());
+  }, [dispatch]);
 
   // Compute stat totals dynamically
   const totalProperties = properties.length;
@@ -141,28 +149,36 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line/40 text-[13.5px] text-charcoal">
-                  {recentBookings.map((b) => (
-                    <tr key={b.id} className="hover:bg-cream/15 transition-colors">
-                      <td className="py-3.5 font-mono text-[12.5px] font-bold">{b.id}</td>
-                      <td className="py-3.5 font-semibold text-forest-dark">{b.propertyName}</td>
-                      <td className="py-3.5">
-                        <span className="font-medium block">{b.userName}</span>
-                        <span className="text-[11.5px] text-charcoal-soft block">{b.userEmail}</span>
-                      </td>
-                      <td className="py-3.5 font-medium">{b.checkIn} to {b.checkOut}</td>
-                      <td className="py-3.5 font-bold text-forest-dark">₹{b.totalAmount}</td>
-                      <td className="py-3.5">
-                        <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                          b.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' :
-                          b.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
-                          b.status === 'Cancelled' ? 'bg-rose-100 text-rose-800' :
-                          'bg-amber-100 text-amber-800'
-                        }`}>
-                          {b.status}
-                        </span>
+                  {recentBookings.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="py-6 text-center text-charcoal-soft font-medium">
+                        No recent bookings found.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    recentBookings.map((b) => (
+                      <tr key={b.id} className="hover:bg-cream/15 transition-colors">
+                        <td className="py-3.5 font-mono text-[12.5px] font-bold">{b.id}</td>
+                        <td className="py-3.5 font-semibold text-forest-dark">{b.propertyName}</td>
+                        <td className="py-3.5">
+                          <span className="font-medium block">{b.userName}</span>
+                          <span className="text-[11.5px] text-charcoal-soft block">{b.userEmail}</span>
+                        </td>
+                        <td className="py-3.5 font-medium">{b.checkIn} to {b.checkOut}</td>
+                        <td className="py-3.5 font-bold text-forest-dark">₹{b.totalAmount}</td>
+                        <td className="py-3.5">
+                          <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                            b.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' :
+                            b.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
+                            b.status === 'Cancelled' ? 'bg-rose-100 text-rose-800' :
+                            'bg-amber-100 text-amber-800'
+                          }`}>
+                            {b.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

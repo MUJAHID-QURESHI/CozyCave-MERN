@@ -1,9 +1,18 @@
+const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const User = require('../models/User');
 const Property = require('../models/Property');
 const Review = require('../models/Review');
 const Availability = require('../models/Availability');
 const { getDatesInRange } = require('../services/availabilityService');
+
+const findBookingByIdOrRef = async (id) => {
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    const b = await Booking.findById(id);
+    if (b) return b;
+  }
+  return await Booking.findOne({ bookingId: id });
+};
 
 // @desc    Get all bookings (Admin only)
 // @route   GET /api/admin/bookings
@@ -17,7 +26,7 @@ const getAllBookings = async (req, res, next) => {
     if (paymentStatus) query.paymentStatus = paymentStatus;
 
     const bookings = await Booking.find(query)
-      .populate('property', 'name location pricePerNight')
+      .populate('property', 'name location pricePerNight images')
       .populate('customer', 'name email mobile')
       .sort({ createdAt: -1 });
 
@@ -36,7 +45,11 @@ const getAllBookings = async (req, res, next) => {
 // @access  Private/Admin
 const getAdminBookingById = async (req, res, next) => {
   try {
-    const booking = await Booking.findById(req.params.id)
+    let bookingQuery = mongoose.Types.ObjectId.isValid(req.params.id)
+      ? Booking.findById(req.params.id)
+      : Booking.findOne({ bookingId: req.params.id });
+
+    const booking = await bookingQuery
       .populate('property')
       .populate('customer', 'name email mobile profileImage');
 
@@ -61,7 +74,7 @@ const getAdminBookingById = async (req, res, next) => {
 const updateBookingStatus = async (req, res, next) => {
   try {
     const { bookingStatus, paymentStatus, cancellationReason } = req.body;
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrRef(req.params.id);
 
     if (!booking) {
       res.status(404);
@@ -332,7 +345,7 @@ const getRevenueReport = async (req, res, next) => {
 // @access  Private/Admin
 const deleteBooking = async (req, res, next) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrRef(req.params.id);
     if (!booking) {
       res.status(404);
       throw new Error('Booking not found');
@@ -348,7 +361,7 @@ const deleteBooking = async (req, res, next) => {
       });
     }
 
-    await Booking.findByIdAndDelete(req.params.id);
+    await Booking.findByIdAndDelete(booking._id);
 
     res.status(200).json({
       success: true,

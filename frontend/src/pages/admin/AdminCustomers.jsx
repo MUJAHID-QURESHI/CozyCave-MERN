@@ -1,48 +1,60 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Users, Mail, Phone, Calendar, Briefcase } from 'lucide-react';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
+import { fetchAdminBookings } from '../../redux/slices/bookingSlice';
 
 export default function AdminCustomers() {
+  const dispatch = useDispatch();
   const { bookings } = useSelector((state) => state.bookings);
-  
-  // Define default customer profiles and extract unique guest profiles from bookings dynamically
-  const defaultCustomers = [
-    {
-      name: 'Emma Morrison',
-      email: 'emma@example.com',
-      mobile: '+1 (828) 555-4921',
-      joinedDate: 'January 2025'
-    },
-    {
-      name: 'James Delgado',
-      email: 'james@example.com',
-      mobile: '+1 (510) 555-3921',
-      joinedDate: 'March 2025'
-    },
-    {
-      name: 'Sofia Petrova',
-      email: 'sofia@example.com',
-      mobile: '+1 (704) 555-9011',
-      joinedDate: 'June 2025'
+
+  useEffect(() => {
+    dispatch(fetchAdminBookings());
+  }, [dispatch]);
+
+  // Dynamically extract customer profiles from live database bookings
+  const extractedCustomers = [];
+  const seenEmails = new Set();
+
+  bookings.forEach(b => {
+    const email = (b.userEmail || '').trim().toLowerCase();
+    if (email && !seenEmails.has(email)) {
+      seenEmails.add(email);
+      const customerBookings = bookings.filter(x => (x.userEmail || '').trim().toLowerCase() === email);
+      const totalSpend = customerBookings
+        .filter(x => x.status !== 'Cancelled')
+        .reduce((sum, x) => sum + x.totalAmount, 0);
+
+      extractedCustomers.push({
+        name: b.userName || 'Guest Customer',
+        email: b.userEmail,
+        mobile: b.userMobile || 'N/A',
+        joinedDate: b.createdAt || 'Recent',
+        totalStays: customerBookings.length,
+        totalSpend
+      });
     }
+  });
+
+  const defaultCustomers = [
+    { name: 'Emma Morrison', email: 'emma@example.com', mobile: '+1 (828) 555-4921', joinedDate: 'January 2025' },
+    { name: 'James Delgado', email: 'james@example.com', mobile: '+1 (510) 555-3921', joinedDate: 'March 2025' },
+    { name: 'Sofia Petrova', email: 'sofia@example.com', mobile: '+1 (704) 555-9011', joinedDate: 'June 2025' }
   ];
 
-  // Group bookings by guest email to build dynamic spending profiles
-  const customerList = defaultCustomers.map(customer => {
-    const customerBookings = bookings.filter(b => b.userEmail?.toLowerCase() === customer.email.toLowerCase());
-    const totalStays = customerBookings.length;
-    const totalSpend = customerBookings
-      .filter(b => b.status !== 'Cancelled')
-      .reduce((sum, b) => sum + b.totalAmount, 0);
-
-    return {
-      ...customer,
-      totalStays,
-      totalSpend
-    };
+  defaultCustomers.forEach(def => {
+    if (!seenEmails.has(def.email.toLowerCase())) {
+      const customerBookings = bookings.filter(b => b.userEmail?.toLowerCase() === def.email.toLowerCase());
+      extractedCustomers.push({
+        ...def,
+        totalStays: customerBookings.length,
+        totalSpend: customerBookings.filter(b => b.status !== 'Cancelled').reduce((sum, b) => sum + b.totalAmount, 0)
+      });
+    }
   });
+
+  const customerList = extractedCustomers;
 
   return (
     <div className="min-h-screen bg-cream/30 flex">

@@ -3,18 +3,22 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Search, Eye, XCircle, CheckCircle, Trash2, Filter, ChevronDown, Check } from 'lucide-react';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
-import { updateBookingStatus, deleteBooking } from '../../redux/slices/bookingSlice';
+import { fetchAdminBookings, updateBookingStatus, deleteBooking } from '../../redux/slices/bookingSlice';
 import { addToast } from '../../redux/slices/uiSlice';
 import Modal from '../../components/common/Modal';
 
 export default function AdminBookings() {
   const dispatch = useDispatch();
-  const { bookings } = useSelector((state) => state.bookings);
+  const { bookings, loading } = useSelector((state) => state.bookings);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchAdminBookings());
+  }, [dispatch]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -91,9 +95,9 @@ export default function AdminBookings() {
   // Filter bookings
   const filteredBookings = bookings.filter((b) => {
     const matchesSearch = 
-      b.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      b.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      b.propertyName.toLowerCase().includes(searchTerm.toLowerCase());
+      (b.userName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (b.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (b.propertyName || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === '' || b.status === statusFilter;
 
@@ -198,39 +202,53 @@ export default function AdminBookings() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line/40 text-[13.5px] text-charcoal">
-                {filteredBookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-cream/10 transition-colors">
-                    <td className="p-4 font-mono font-bold text-[12px]">{b.id}</td>
-                    <td className="p-4 font-semibold text-forest-dark">{b.propertyName}</td>
-                    <td className="p-4">
-                      <span className="font-medium block leading-tight">{b.userName}</span>
-                      <span className="text-[11.5px] text-charcoal-soft block mt-0.5">{b.userEmail}</span>
-                    </td>
-                    <td className="p-4 font-medium">{b.checkIn} to {b.checkOut}</td>
-                    <td className="p-4 font-bold text-forest-dark">₹{b.totalAmount}</td>
-                    <td className="p-4 text-center">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                        b.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' :
-                        b.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
-                        b.status === 'Cancelled' ? 'bg-rose-100 text-rose-800' :
-                        'bg-amber-100 text-amber-800'
-                      }`}>
-                        {b.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => setSelectedBooking(b)}
-                          className="p-2 border border-line hover:border-forest text-charcoal hover:text-forest rounded-lg hover:bg-cream/20 transition-colors"
-                          title="View Details"
-                        >
-                          <Eye size={14} />
-                        </button>
-                      </div>
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="p-10 text-center text-charcoal-soft font-medium">
+                      Loading bookings from database...
                     </td>
                   </tr>
-                ))}
+                ) : filteredBookings.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="p-10 text-center text-charcoal-soft font-medium">
+                      No bookings found matching your search.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredBookings.map((b) => (
+                    <tr key={b.id} className="hover:bg-cream/10 transition-colors">
+                      <td className="p-4 font-mono font-bold text-[12px]">{b.id}</td>
+                      <td className="p-4 font-semibold text-forest-dark">{b.propertyName}</td>
+                      <td className="p-4">
+                        <span className="font-medium block leading-tight">{b.userName}</span>
+                        <span className="text-[11.5px] text-charcoal-soft block mt-0.5">{b.userEmail}</span>
+                      </td>
+                      <td className="p-4 font-medium">{b.checkIn} to {b.checkOut}</td>
+                      <td className="p-4 font-bold text-forest-dark">₹{b.totalAmount}</td>
+                      <td className="p-4 text-center">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                          b.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' :
+                          b.status === 'Confirmed' ? 'bg-blue-100 text-blue-800' :
+                          b.status === 'Cancelled' ? 'bg-rose-100 text-rose-800' :
+                          'bg-amber-100 text-amber-800'
+                        }`}>
+                          {b.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setSelectedBooking(b)}
+                            className="p-2 border border-line hover:border-forest text-charcoal hover:text-forest rounded-lg hover:bg-cream/20 transition-colors cursor-pointer"
+                            title="View Details"
+                          >
+                            <Eye size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

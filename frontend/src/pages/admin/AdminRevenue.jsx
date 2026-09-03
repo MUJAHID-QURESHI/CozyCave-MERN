@@ -1,13 +1,19 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { IndianRupee, Landmark, TrendingUp, Award, Calendar } from 'lucide-react';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
+import { fetchAdminBookings } from '../../redux/slices/bookingSlice';
 import { mockRevenueStats } from '../../data/mockData';
 
 export default function AdminRevenue() {
+  const dispatch = useDispatch();
   const { bookings } = useSelector((state) => state.bookings);
+
+  useEffect(() => {
+    dispatch(fetchAdminBookings());
+  }, [dispatch]);
 
   // Compute stats from active bookings dynamically
   const activeBookings = bookings.filter(b => b.status !== 'Cancelled');
