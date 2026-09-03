@@ -110,7 +110,7 @@ const updateReview = async (req, res, next) => {
       throw new Error('Review not found');
     }
 
-    if (review.customer.toString() !== req.user._id.toString()) {
+    if (review.customer.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       res.status(403);
       throw new Error('Not authorized to edit this review');
     }
@@ -121,6 +121,9 @@ const updateReview = async (req, res, next) => {
     review.location = req.body.location !== undefined ? req.body.location : review.location;
     review.comfort = req.body.comfort !== undefined ? req.body.comfort : review.comfort;
     review.service = req.body.service !== undefined ? req.body.service : review.service;
+    if (req.body.isVisible !== undefined) {
+      review.isVisible = !!req.body.isVisible;
+    }
 
     const updatedReview = await review.save();
 
