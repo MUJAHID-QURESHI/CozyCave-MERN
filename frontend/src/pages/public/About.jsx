@@ -34,11 +34,11 @@ export default function About() {
                 From peaceful escapes to unique stays in beautiful surroundings, CozyCave brings together carefully selected properties designed for comfort, privacy, and unforgettable experiences. Our goal is to make every stay feel personal, effortless, and truly special.
               </p>
             </div>
-            <div className="h-[320px] sm:h-[360px] md:h-[380px] rounded-2xl overflow-hidden shadow-md bg-cream relative">
+            <div className="rounded-2xl overflow-hidden shadow-md bg-cream relative max-w-[420px] w-full mx-auto md:ml-auto">
               <img 
                 src={aboutExterior} 
                 alt="Modern A-frame house exterior at sunset" 
-                className="w-full h-full object-cover"
+                className="w-full h-auto block rounded-2xl"
               />
             </div>
           </div>
@@ -58,11 +58,11 @@ export default function About() {
                 Every CozyCave property is selected with attention to comfort, cleanliness, privacy, and the overall guest experience. We believe great stays are created through thoughtful spaces, transparent information, and service that guests can trust.
               </p>
             </div>
-            <div className="h-[320px] sm:h-[360px] md:h-[380px] rounded-2xl overflow-hidden shadow-md bg-cream-deep relative">
+            <div className="rounded-2xl overflow-hidden shadow-md bg-cream-deep relative max-w-[460px] w-full mx-auto md:ml-auto">
               <img 
                 src={aboutInterior} 
                 alt="Cozy modern living room interior" 
-                className="w-full h-full object-cover"
+                className="w-full h-auto block rounded-2xl"
               />
             </div>
           </div>
