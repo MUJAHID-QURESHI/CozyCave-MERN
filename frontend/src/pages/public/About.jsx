@@ -35,9 +35,9 @@ export default function About() {
               </p>
             </div>
             <div className="rounded-2xl overflow-hidden shadow-md bg-cream relative max-w-[420px] w-full mx-auto md:ml-auto">
-              <img 
-                src={aboutExterior} 
-                alt="Modern A-frame house exterior at sunset" 
+              <img
+                src={aboutExterior}
+                alt="Modern A-frame house exterior at sunset"
                 className="w-full h-auto block rounded-2xl"
               />
             </div>
@@ -59,9 +59,9 @@ export default function About() {
               </p>
             </div>
             <div className="rounded-2xl overflow-hidden shadow-md bg-cream-deep relative max-w-[460px] w-full mx-auto md:ml-auto">
-              <img 
-                src={aboutInterior} 
-                alt="Cozy modern living room interior" 
+              <img
+                src={aboutInterior}
+                alt="Cozy modern living room interior"
                 className="w-full h-auto block rounded-2xl"
               />
             </div>
