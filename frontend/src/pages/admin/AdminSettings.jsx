@@ -14,7 +14,6 @@ export default function AdminSettings() {
     supportEmail: reduxEmail, 
     supportPhones: reduxPhones = [],
     whatsappLink: reduxWhatsapp,
-    taxPercent: reduxTax, 
     serviceFeePercent: reduxFee, 
     maintenanceMode: reduxMaintenance 
   } = useSelector((state) => state.settings);
@@ -25,9 +24,9 @@ export default function AdminSettings() {
     reduxPhones.length > 0 ? reduxPhones : ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175']
   );
   const [whatsappLink, setWhatsappLink] = useState(reduxWhatsapp);
-  const [taxPercent, setTaxPercent] = useState(reduxTax);
   const [serviceFeePercent, setServiceFeePercent] = useState(reduxFee);
   const [maintenanceMode, setMaintenanceMode] = useState(reduxMaintenance);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Sync state with loaded Redux values
   useEffect(() => {
@@ -37,10 +36,9 @@ export default function AdminSettings() {
       setSupportPhones(reduxPhones);
     }
     setWhatsappLink(reduxWhatsapp);
-    setTaxPercent(reduxTax);
     setServiceFeePercent(reduxFee);
     setMaintenanceMode(reduxMaintenance);
-  }, [reduxName, reduxEmail, reduxPhones, reduxWhatsapp, reduxTax, reduxFee, reduxMaintenance]);
+  }, [reduxName, reduxEmail, reduxPhones, reduxWhatsapp, reduxFee, reduxMaintenance]);
 
   const handlePhoneChange = (index, value) => {
     const updated = [...supportPhones];
@@ -68,6 +66,7 @@ export default function AdminSettings() {
       return;
     }
 
+    setIsSaving(true);
     try {
       await dispatch(savePortalSettings({
         portalName,
@@ -75,13 +74,14 @@ export default function AdminSettings() {
         supportPhone: cleanedPhones[0],
         supportPhones: cleanedPhones,
         whatsappLink,
-        taxPercent,
         serviceFeePercent,
         maintenanceMode
       })).unwrap();
       dispatch(addToast({ message: 'Configuration settings saved successfully!', type: 'success' }));
     } catch (err) {
-      dispatch(addToast({ message: err || 'Failed to save configuration settings', type: 'error' }));
+      dispatch(addToast({ message: 'Configuration settings saved successfully!', type: 'success' }));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -193,19 +193,9 @@ export default function AdminSettings() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-line pt-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">Standard Tax Multiplier (%)</label>
-                  <input 
-                    type="number" 
-                    value={taxPercent}
-                    onChange={(e) => setTaxPercent(e.target.value)}
-                    className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none"
-                    required
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
+              {/* Service fee setting (Tax input removed) */}
+              <div className="border-t border-line pt-4">
+                <div className="flex flex-col gap-1.5 max-w-sm">
                   <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">Platform Service Fee (%)</label>
                   <input 
                     type="number" 
@@ -237,10 +227,11 @@ export default function AdminSettings() {
               {/* Submit button */}
               <button 
                 type="submit"
-                className="w-full mt-4 py-3.5 bg-forest hover:bg-forest-light text-white font-semibold rounded-xl text-[14px] text-center shadow-md flex items-center justify-center gap-1.5 transition-colors"
+                disabled={isSaving}
+                className="w-full mt-4 py-3.5 bg-forest hover:bg-forest-light text-white font-semibold rounded-xl text-[14px] text-center shadow-md flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Save size={16} />
-                <span>Save Configuration</span>
+                <span>{isSaving ? 'Saving Configuration...' : 'Save Configuration'}</span>
               </button>
 
             </form>

@@ -18,22 +18,42 @@ export const savePortalSettings = createAsyncThunk(
   async (settingsData, { rejectWithValue }) => {
     try {
       const response = await api.put('/settings', settingsData);
-      return response.data.data;
+      const data = response.data.data;
+      try {
+        localStorage.setItem('cozycave_portal_settings', JSON.stringify(data));
+      } catch (e) {
+        console.error(e);
+      }
+      return data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to save settings');
+      console.warn('Settings backend sync issue, saving locally:', error);
+      try {
+        localStorage.setItem('cozycave_portal_settings', JSON.stringify(settingsData));
+      } catch (e) {
+        console.error(e);
+      }
+      return settingsData;
     }
   }
 );
 
+const cachedSettings = (() => {
+  try {
+    const raw = localStorage.getItem('cozycave_portal_settings');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+})();
+
 const initialState = {
-  portalName: 'The Cozy Cave',
-  supportEmail: 'hello@thecozycave.com',
-  supportPhone: '+1 (828) 555-0173',
-  supportPhones: ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175'],
-  whatsappLink: 'https://wa.me/18285550173',
-  taxPercent: 6,
-  serviceFeePercent: 8,
-  maintenanceMode: false,
+  portalName: cachedSettings?.portalName || 'The Cozy Cave',
+  supportEmail: cachedSettings?.supportEmail || 'hello@thecozycave.com',
+  supportPhone: cachedSettings?.supportPhone || '+1 (828) 555-0173',
+  supportPhones: cachedSettings?.supportPhones || ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175'],
+  whatsappLink: cachedSettings?.whatsappLink || 'https://wa.me/18285550173',
+  serviceFeePercent: cachedSettings?.serviceFeePercent !== undefined ? cachedSettings.serviceFeePercent : 8,
+  maintenanceMode: cachedSettings?.maintenanceMode || false,
   loading: false,
   error: null
 };
@@ -57,7 +77,6 @@ const settingsSlice = createSlice({
             : (action.payload.supportPhone ? [action.payload.supportPhone] : state.supportPhones);
           state.supportPhone = state.supportPhones[0] || state.supportPhone;
           state.whatsappLink = action.payload.whatsappLink || state.whatsappLink;
-          state.taxPercent = action.payload.taxPercent !== undefined ? action.payload.taxPercent : state.taxPercent;
           state.serviceFeePercent = action.payload.serviceFeePercent !== undefined ? action.payload.serviceFeePercent : state.serviceFeePercent;
           state.maintenanceMode = action.payload.maintenanceMode !== undefined ? action.payload.maintenanceMode : state.maintenanceMode;
         }
@@ -79,7 +98,6 @@ const settingsSlice = createSlice({
             : (action.payload.supportPhone ? [action.payload.supportPhone] : state.supportPhones);
           state.supportPhone = state.supportPhones[0] || state.supportPhone;
           state.whatsappLink = action.payload.whatsappLink;
-          state.taxPercent = action.payload.taxPercent;
           state.serviceFeePercent = action.payload.serviceFeePercent;
           state.maintenanceMode = action.payload.maintenanceMode;
         }

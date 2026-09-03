@@ -11,7 +11,7 @@ const settingsSchema = new mongoose.Schema(
     },
     supportAddress: { type: String, default: '' },
     whatsappLink: { type: String, default: 'https://wa.me/18285550173' },
-    taxPercent: { type: Number, default: 6 },
+    taxPercent: { type: Number, default: 0 },
     serviceFeePercent: { type: Number, default: 8 },
     maintenanceMode: { type: Boolean, default: false }
   },

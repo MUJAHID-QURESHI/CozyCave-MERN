@@ -18,7 +18,7 @@ export default function CancellationPolicy() {
 
           <h3 className="font-fraunces text-xl font-semibold text-forest-dark mt-8">Flexible Policy</h3>
           <p>
-            Full refund (minus service taxes) up to 24 hours prior to check-in. Cancellations made within 24 hours are non-refundable.
+            Full refund (minus service fees) up to 24 hours prior to check-in. Cancellations made within 24 hours are non-refundable.
           </p>
 
           <h3 className="font-fraunces text-xl font-semibold text-forest-dark mt-8">Moderate Policy</h3>

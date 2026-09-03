@@ -132,7 +132,7 @@ export default function BookingConfirmation() {
             <div className="flex justify-between items-end bg-cream/45 p-4 rounded-xl">
               <div>
                 <span className="text-[11px] font-bold text-charcoal-soft uppercase tracking-wider block">Amount Paid</span>
-                <span className="text-[12px] text-charcoal-soft font-normal">All taxes & fees included</span>
+                <span className="text-[12px] text-charcoal-soft font-normal">All fees included</span>
               </div>
               <div className="font-inter text-2xl font-bold text-forest-dark">
                 ${totalAmount}

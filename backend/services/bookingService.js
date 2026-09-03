@@ -42,7 +42,7 @@ const createPendingBooking = async (userId, payload) => {
     subtotal: pricing.subtotal,
     cleaningFee: pricing.cleaningFee,
     serviceFee: pricing.serviceFee,
-    tax: pricing.tax,
+    tax: 0,
     totalAmount: pricing.totalAmount,
     paymentStatus: 'pending',
     bookingStatus: 'pending',

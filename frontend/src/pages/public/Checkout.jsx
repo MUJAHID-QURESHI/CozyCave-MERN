@@ -369,10 +369,6 @@ export default function Checkout() {
                 <span>Service fee</span>
                 <span className="font-medium">₹{serviceFee}</span>
               </div>
-              <div className="flex justify-between text-charcoal">
-                <span>Occupancy taxes</span>
-                <span className="font-medium">₹{taxes}</span>
-              </div>
               <div className="flex justify-between font-bold text-forest-dark pt-3 border-t border-line text-[15.5px]">
                 <span>Total (INR)</span>
                 <span>₹{totalAmount}</span>

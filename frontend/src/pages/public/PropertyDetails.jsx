@@ -272,8 +272,8 @@ export default function PropertyDetails() {
   const baseCost = pricingBreakdown ? pricingBreakdown.subtotal : (price * nights);
   const cleaningFee = pricingBreakdown ? pricingBreakdown.cleaningFee : (nights > 0 ? 75 : 0);
   const serviceFee = pricingBreakdown ? pricingBreakdown.serviceFee : (nights > 0 ? Math.round((price * nights) * 0.08) : 0);
-  const taxes = pricingBreakdown ? pricingBreakdown.tax : (nights > 0 ? Math.round((price * nights) * 0.06) : 0);
-  const totalAmount = pricingBreakdown ? pricingBreakdown.totalAmount : (baseCost + cleaningFee + serviceFee + taxes);
+  const taxes = 0;
+  const totalAmount = pricingBreakdown ? pricingBreakdown.totalAmount : (baseCost + cleaningFee + serviceFee);
 
   const handleBooking = (e) => {
     e.preventDefault();
@@ -322,7 +322,7 @@ export default function PropertyDetails() {
       subtotal: baseCost,
       cleaningFee,
       serviceFee,
-      taxes,
+      taxes: 0,
       totalAmount
     };
 
@@ -816,10 +816,6 @@ export default function PropertyDetails() {
                       <div className="flex justify-between text-charcoal">
                         <span>Service fee</span>
                         <span>₹{serviceFee}</span>
-                      </div>
-                      <div className="flex justify-between text-charcoal">
-                        <span>Occupancy taxes</span>
-                        <span>₹{taxes}</span>
                       </div>
                       <div className="flex justify-between font-bold text-forest-dark pt-3 border-t border-line text-[15px]">
                         <span>Total Amount</span>
