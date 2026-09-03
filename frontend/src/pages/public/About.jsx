@@ -1,6 +1,8 @@
 import React from 'react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
+import aboutExterior from '../../assets/about-exterior.jpg';
+import aboutInterior from '../../assets/about-interior.jpg';
 
 export default function About() {
   return (
@@ -18,7 +20,7 @@ export default function About() {
           </div>
         </section>
 
-        {/* Content sections */}
+        {/* Content sections: About CozyCave */}
         <section className="py-20 px-6 md:px-12 bg-white">
           <div className="max-w-[1000px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
@@ -26,42 +28,42 @@ export default function About() {
                 About CozyCave
               </h3>
               <p className="text-[14.5px] text-charcoal leading-relaxed mb-4 font-inter">
-                Founded in 2024, CozyCave was created for travelers who seek more than a typical hotel room. We believe the place you sleep should be as memorable as the destination itself.
+                Founded in 2026, CozyCave was created with a simple vision: to offer travelers more than just a place to stay. We believe every journey deserves a comfortable, memorable, and thoughtfully curated home away from home.
               </p>
               <p className="text-[14.5px] text-charcoal leading-relaxed font-inter">
-                We scour the country's most scenic regions—from quiet forest meadows and soaring mountain ranges to peaceful coastal shores—to handpick homes that have unique character, elegant design, and top-tier comfort.
+                From peaceful escapes to unique stays in beautiful surroundings, CozyCave brings together carefully selected properties designed for comfort, privacy, and unforgettable experiences. Our goal is to make every stay feel personal, effortless, and truly special.
               </p>
             </div>
-            <div className="h-[300px] rounded-2xl overflow-hidden shadow-md bg-cream relative">
+            <div className="h-[320px] sm:h-[360px] md:h-[380px] rounded-2xl overflow-hidden shadow-md bg-cream relative">
               <img 
-                src="https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=600&q=80" 
-                alt="Cozy stay cabin view" 
+                src={aboutExterior} 
+                alt="Modern A-frame house exterior at sunset" 
                 className="w-full h-full object-cover"
               />
             </div>
           </div>
         </section>
 
-        {/* Mission and Hospitality section */}
+        {/* Mission and Standards section */}
         <section className="py-20 px-6 md:px-12 bg-cream">
           <div className="max-w-[1000px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="h-[300px] rounded-2xl overflow-hidden shadow-md bg-cream-deep md:order-last">
-              <img 
-                src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=600&q=80" 
-                alt="Cozy interior room" 
-                className="w-full h-full object-cover"
-              />
-            </div>
             <div>
               <h3 className="font-fraunces text-2xl md:text-3xl text-forest-dark mb-5 font-semibold">
                 Our Mission & Standards
               </h3>
               <p className="text-[14.5px] text-charcoal leading-relaxed mb-4 font-inter">
-                We hold ourselves to a "five-star cozy standard". This means every property in our collection is physically inspected, styled, and equipped with premium amenities (like high-speed Wi-Fi, fully stocked kitchens, fireplace, or hot tubs) before we publish them.
+                At CozyCave, our mission is to make every stay feel comfortable, reliable, and memorable. We focus on creating a seamless experience from discovering the perfect stay to completing your booking and arriving at your destination.
               </p>
               <p className="text-[14.5px] text-charcoal leading-relaxed font-inter">
-                Our ultimate goal is to facilitate seamless, stress-free bookings so that you can spend less time logistics planning and more time enjoying your vacation getaway.
+                Every CozyCave property is selected with attention to comfort, cleanliness, privacy, and the overall guest experience. We believe great stays are created through thoughtful spaces, transparent information, and service that guests can trust.
               </p>
+            </div>
+            <div className="h-[320px] sm:h-[360px] md:h-[380px] rounded-2xl overflow-hidden shadow-md bg-cream-deep relative">
+              <img 
+                src={aboutInterior} 
+                alt="Cozy modern living room interior" 
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </section>
