@@ -16,6 +16,7 @@ export default function AdminSettings() {
     supportPhones: reduxPhones = [],
     whatsappLink: reduxWhatsapp,
     serviceFeePercent: reduxFee, 
+    bookingWindowMonths: reduxWindow = 3,
     maintenanceMode: reduxMaintenance 
   } = useSelector((state) => state.settings);
 
@@ -26,6 +27,7 @@ export default function AdminSettings() {
   );
   const [whatsappLink, setWhatsappLink] = useState(reduxWhatsapp);
   const [serviceFeePercent, setServiceFeePercent] = useState(reduxFee);
+  const [bookingWindowMonths, setBookingWindowMonths] = useState(reduxWindow || 3);
   const [maintenanceMode, setMaintenanceMode] = useState(reduxMaintenance);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -44,8 +46,9 @@ export default function AdminSettings() {
     }
     setWhatsappLink(reduxWhatsapp);
     setServiceFeePercent(reduxFee);
+    setBookingWindowMonths(reduxWindow || 3);
     setMaintenanceMode(reduxMaintenance);
-  }, [reduxName, reduxEmail, reduxPhones, reduxWhatsapp, reduxFee, reduxMaintenance]);
+  }, [reduxName, reduxEmail, reduxPhones, reduxWhatsapp, reduxFee, reduxWindow, reduxMaintenance]);
 
   const handlePhoneChange = (index, value) => {
     const updated = [...supportPhones];
@@ -82,6 +85,7 @@ export default function AdminSettings() {
         supportPhones: cleanedPhones,
         whatsappLink,
         serviceFeePercent,
+        bookingWindowMonths: Number(bookingWindowMonths),
         maintenanceMode
       })).unwrap();
       dispatch(addToast({ message: 'Configuration settings saved successfully!', type: 'success' }));
@@ -235,9 +239,29 @@ export default function AdminSettings() {
                 </div>
               </div>
 
-              {/* Service fee setting (Tax input removed) */}
-              <div className="border-t border-line pt-4">
-                <div className="flex flex-col gap-1.5 max-w-sm">
+              {/* Advance Booking Window & Service fee settings */}
+              <div className="border-t border-line pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">
+                    Customer Advance Booking Limit (Months)
+                  </label>
+                  <select 
+                    value={bookingWindowMonths}
+                    onChange={(e) => setBookingWindowMonths(Number(e.target.value))}
+                    className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none cursor-pointer"
+                  >
+                    <option value={1}>1 Month Ahead Only</option>
+                    <option value={2}>2 Months Ahead</option>
+                    <option value={3}>3 Months Ahead</option>
+                    <option value={6}>6 Months Ahead</option>
+                    <option value={12}>12 Months (1 Year Ahead)</option>
+                  </select>
+                  <span className="text-[11px] text-charcoal-soft">
+                    Customer calendar me sirf itne mahine tak hi booking khuli rahegi. Baki aage ki saari dates block rahengi.
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">Platform Service Fee (%)</label>
                   <input 
                     type="number" 
@@ -246,6 +270,9 @@ export default function AdminSettings() {
                     className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none"
                     required
                   />
+                  <span className="text-[11px] text-charcoal-soft">
+                    Applied and rounded off on stay reservations.
+                  </span>
                 </div>
               </div>
 

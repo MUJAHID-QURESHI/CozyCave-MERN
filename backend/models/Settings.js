@@ -13,6 +13,7 @@ const settingsSchema = new mongoose.Schema(
     whatsappLink: { type: String, default: 'https://wa.me/917999851384' },
     taxPercent: { type: Number, default: 0 },
     serviceFeePercent: { type: Number, default: 2 },
+    bookingWindowMonths: { type: Number, default: 3, min: 1, max: 24 },
     maintenanceMode: { type: Boolean, default: false }
   },
   { timestamps: true }

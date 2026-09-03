@@ -53,6 +53,7 @@ const initialState = {
   supportPhones: cachedSettings?.supportPhones || ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175'],
   whatsappLink: cachedSettings?.whatsappLink || 'https://wa.me/917999851384',
   serviceFeePercent: cachedSettings?.serviceFeePercent !== undefined ? cachedSettings.serviceFeePercent : 2,
+  bookingWindowMonths: cachedSettings?.bookingWindowMonths !== undefined ? cachedSettings.bookingWindowMonths : 3,
   maintenanceMode: cachedSettings?.maintenanceMode || false,
   loading: false,
   error: null
@@ -78,6 +79,7 @@ const settingsSlice = createSlice({
           state.supportPhone = state.supportPhones[0] || state.supportPhone;
           state.whatsappLink = action.payload.whatsappLink || state.whatsappLink;
           state.serviceFeePercent = action.payload.serviceFeePercent !== undefined ? action.payload.serviceFeePercent : state.serviceFeePercent;
+          state.bookingWindowMonths = action.payload.bookingWindowMonths !== undefined ? action.payload.bookingWindowMonths : state.bookingWindowMonths;
           state.maintenanceMode = action.payload.maintenanceMode !== undefined ? action.payload.maintenanceMode : state.maintenanceMode;
         }
       })
@@ -99,6 +101,7 @@ const settingsSlice = createSlice({
           state.supportPhone = state.supportPhones[0] || state.supportPhone;
           state.whatsappLink = action.payload.whatsappLink;
           state.serviceFeePercent = action.payload.serviceFeePercent;
+          state.bookingWindowMonths = action.payload.bookingWindowMonths !== undefined ? action.payload.bookingWindowMonths : state.bookingWindowMonths;
           state.maintenanceMode = action.payload.maintenanceMode;
         }
       })

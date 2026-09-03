@@ -20,6 +20,18 @@ const createPendingBooking = async (userId, payload) => {
     { $set: { bookingStatus: 'cancelled', cancellationReason: 'Superseeded by new checkout' } }
   );
 
+  // Validate advance booking window
+  const Settings = require('../models/Settings');
+  const portalSettings = await Settings.findOne();
+  const allowedMonths = (portalSettings && portalSettings.bookingWindowMonths) ? portalSettings.bookingWindowMonths : 3;
+  const maxAllowedDate = new Date();
+  maxAllowedDate.setMonth(maxAllowedDate.getMonth() + allowedMonths);
+  maxAllowedDate.setDate(maxAllowedDate.getDate() + 1);
+
+  if (new Date(checkIn) > maxAllowedDate || new Date(checkOut) > maxAllowedDate) {
+    throw new Error(`Stays can only be booked up to ${allowedMonths} month${allowedMonths > 1 ? 's' : ''} in advance.`);
+  }
+
   // 1. Check double bookings
   const isAvailable = await checkAvailability(propertyId, checkIn, checkOut);
   if (!isAvailable) {

@@ -37,7 +37,7 @@ const updateSettings = async (req, res, next) => {
 
     const {
       portalName, supportEmail, supportPhone, supportPhones, supportAddress,
-      whatsappLink, serviceFeePercent, maintenanceMode
+      whatsappLink, serviceFeePercent, bookingWindowMonths, maintenanceMode
     } = req.body;
 
     settings.portalName = portalName !== undefined ? portalName : settings.portalName;
@@ -60,6 +60,7 @@ const updateSettings = async (req, res, next) => {
     settings.whatsappLink = whatsappLink !== undefined ? whatsappLink : settings.whatsappLink;
     settings.taxPercent = 0;
     settings.serviceFeePercent = serviceFeePercent !== undefined ? parseFloat(serviceFeePercent) : settings.serviceFeePercent;
+    settings.bookingWindowMonths = bookingWindowMonths !== undefined ? parseInt(bookingWindowMonths) : (settings.bookingWindowMonths || 3);
     settings.maintenanceMode = maintenanceMode !== undefined ? !!maintenanceMode : settings.maintenanceMode;
 
     await settings.save();

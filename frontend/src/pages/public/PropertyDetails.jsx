@@ -18,7 +18,7 @@ export default function PropertyDetails() {
   
   const { selectedProperty } = useSelector((state) => state.properties);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const { serviceFeePercent = 2 } = useSelector((state) => state.settings);
+  const { serviceFeePercent = 2, bookingWindowMonths = 3 } = useSelector((state) => state.settings);
 
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
@@ -184,6 +184,14 @@ export default function PropertyDetails() {
     return `${y}-${m}-${d}`;
   };
 
+  // Compute maximum allowable advance booking date based on admin settings
+  const todayObj = new Date();
+  const allowedMonthsCount = Number(bookingWindowMonths) || 3;
+  const maxBookingDateObj = new Date(todayObj.getFullYear(), todayObj.getMonth() + allowedMonthsCount, todayObj.getDate());
+  const maxBookingDateStr = maxBookingDateObj.toISOString().split('T')[0];
+  const currentMonthStart = new Date(todayObj.getFullYear(), todayObj.getMonth(), 1);
+  const maxAllowedMonthStart = new Date(todayObj.getFullYear(), todayObj.getMonth() + allowedMonthsCount, 1);
+
   const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
   const getFirstDayOfMonth = (y, m) => new Date(y, m, 1).getDay();
 
@@ -213,14 +221,17 @@ export default function PropertyDetails() {
     const todayStr = getLocalTodayString();
     if (dateStr < todayStr) return 'past';
 
-    // 2. Blocked or Booked from availability list
+    // 2. Beyond admin advance booking window limit
+    if (dateStr > maxBookingDateStr) return 'beyond_window';
+
+    // 3. Blocked or Booked from availability list
     const record = availabilityList.find(a => a.date === dateStr);
     if (record) {
       if (record.status === 'blocked') return 'blocked';
       if (record.status === 'booked') return 'booked';
     }
 
-    // 3. Fallback check for property's own blockedDates array (if any)
+    // 4. Fallback check for property's own blockedDates array (if any)
     if (blockedDates && blockedDates.includes(dateStr)) {
       return 'blocked';
     }
@@ -243,12 +254,17 @@ export default function PropertyDetails() {
     const dateStr = getCalDateString(day);
     const status = getCalDateStatus(day);
 
-    if (status === 'past') {
-      dispatch(addToast({ message: 'Cannot select past dates', type: 'warning' }));
+    if (status === 'past' || status === 'beyond_window') {
+      dispatch(addToast({ 
+        message: status === 'past' 
+          ? 'Cannot select past dates' 
+          : `Reservations are open up to ${bookingWindowMonths || 3} months in advance`, 
+        type: 'warning' 
+      }));
       return;
     }
     if (status === 'blocked' || status === 'booked') {
-      dispatch(addToast({ message: 'This date is already blocked or booked', type: 'warning' }));
+      dispatch(addToast({ message: 'This date is already booked or blocked', type: 'warning' }));
       return;
     }
 
@@ -283,7 +299,11 @@ export default function PropertyDetails() {
     }
   };
 
+  const isPrevCalDisabled = new Date(calYear, calMonth, 1) <= currentMonthStart;
+  const isNextCalDisabled = new Date(calYear, calMonth + 1, 1) > maxAllowedMonthStart;
+
   const handlePrevCalMonth = () => {
+    if (isPrevCalDisabled) return;
     if (calMonth === 0) {
       setCalMonth(11);
       setCalYear(calYear - 1);
@@ -293,6 +313,7 @@ export default function PropertyDetails() {
   };
 
   const handleNextCalMonth = () => {
+    if (isNextCalDisabled) return;
     if (calMonth === 11) {
       setCalMonth(0);
       setCalYear(calYear + 1);
@@ -303,6 +324,7 @@ export default function PropertyDetails() {
 
   // Date availability and price calculation helper
   const isDateBlocked = (dateStr) => {
+    if (dateStr > maxBookingDateStr) return true;
     const record = availabilityList.find(a => a.date === dateStr);
     if (record && (record.status === 'blocked' || record.status === 'booked')) {
       return true;
@@ -331,6 +353,13 @@ export default function PropertyDetails() {
     }
     if (!checkIn || !checkOut) {
       dispatch(addToast({ message: 'Please select check-in and check-out dates', type: 'warning' }));
+      return;
+    }
+    if (checkIn > maxBookingDateStr || checkOut > maxBookingDateStr) {
+      dispatch(addToast({ 
+        message: `Stays can only be booked up to ${bookingWindowMonths || 3} months in advance`, 
+        type: 'warning' 
+      }));
       return;
     }
     if (nights <= 0) {
@@ -758,14 +787,26 @@ export default function PropertyDetails() {
                     <button 
                       type="button"
                       onClick={handlePrevCalMonth}
-                      className="p-1 border border-line hover:bg-cream/45 rounded text-charcoal hover:text-forest transition-colors"
+                      disabled={isPrevCalDisabled}
+                      className={`p-1 border border-line rounded transition-colors ${
+                        isPrevCalDisabled 
+                          ? 'opacity-30 cursor-not-allowed text-charcoal-soft' 
+                          : 'hover:bg-cream/45 text-charcoal hover:text-forest cursor-pointer'
+                      }`}
+                      title={isPrevCalDisabled ? 'Cannot go to past months' : 'Previous Month'}
                     >
                       <ChevronLeft size={12} />
                     </button>
                     <button 
                       type="button"
                       onClick={handleNextCalMonth}
-                      className="p-1 border border-line hover:bg-cream/45 rounded text-charcoal hover:text-forest transition-colors"
+                      disabled={isNextCalDisabled}
+                      className={`p-1 border border-line rounded transition-colors ${
+                        isNextCalDisabled 
+                          ? 'opacity-30 cursor-not-allowed text-charcoal-soft' 
+                          : 'hover:bg-cream/45 text-charcoal hover:text-forest cursor-pointer'
+                      }`}
+                      title={isNextCalDisabled ? `Advance limit reached (${bookingWindowMonths || 3} months)` : 'Next Month'}
                     >
                       <ChevronRight size={12} />
                     </button>
@@ -799,20 +840,19 @@ export default function PropertyDetails() {
                     const isEnd = checkOut && dateStr === checkOut;
                     const isRange = checkIn && checkOut && dateStr > checkIn && dateStr < checkOut;
 
+                    const isDisabled = status === 'past' || status === 'beyond_window' || status === 'blocked' || status === 'booked';
+
                     let bgClass = '';
                     let textClass = 'text-charcoal';
                     let borderClass = 'border-transparent';
 
-                    if (status === 'past') {
+                    if (isDisabled) {
                       bgClass = 'bg-gray-50 opacity-40 cursor-not-allowed';
                       textClass = 'text-charcoal-soft line-through';
-                    } else if (status === 'blocked' || status === 'booked') {
-                      bgClass = 'bg-rose-50/70 opacity-60 cursor-not-allowed';
-                      textClass = 'text-rose-400 font-medium';
-                      borderClass = 'border-rose-100';
+                      borderClass = 'border-line/40';
                     } else {
                       // Available
-                      bgClass = 'bg-emerald-50/70 hover:bg-emerald-100/70';
+                      bgClass = 'bg-emerald-50/70 hover:bg-emerald-100/70 cursor-pointer';
                       textClass = 'text-emerald-800';
                       borderClass = 'border-emerald-100/30';
                     }
@@ -833,12 +873,20 @@ export default function PropertyDetails() {
                         key={`day-${day}`}
                         type="button"
                         onClick={() => handleDateClick(day)}
-                        disabled={status === 'past' || status === 'blocked' || status === 'booked'}
+                        disabled={isDisabled}
                         className={`w-full aspect-square border rounded-lg flex flex-col justify-center items-center transition-all ${bgClass} ${textClass} ${borderClass} focus:outline-none`}
-                        title={status === 'blocked' || status === 'booked' ? 'Not available' : `₹${priceVal} / night`}
+                        title={
+                          status === 'past' 
+                            ? 'Past date' 
+                            : status === 'beyond_window' 
+                            ? `Advance booking limit reached (${bookingWindowMonths || 3} months)` 
+                            : status === 'blocked' || status === 'booked' 
+                            ? 'Date unavailable / booked' 
+                            : `₹${priceVal} / night`
+                        }
                       >
                         <span className="text-[10px] font-bold leading-none">{day}</span>
-                        {status !== 'past' && status !== 'blocked' && status !== 'booked' && (
+                        {!isDisabled && (
                           <span className={`text-[6.5px] mt-0.5 font-extrabold ${isStart || isEnd ? 'text-white' : 'text-forest'}`}>
                             ₹{priceVal}
                           </span>
