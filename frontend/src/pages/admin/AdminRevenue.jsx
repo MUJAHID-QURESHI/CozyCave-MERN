@@ -131,7 +131,6 @@ export default function AdminRevenue() {
                   <th className="pb-3">Date</th>
                   <th className="pb-3">Property</th>
                   <th className="pb-3">Nights</th>
-                  <th className="pb-3">Cleaning</th>
                   <th className="pb-3">Service Fee</th>
                   <th className="pb-3 text-right">Total Earnings</th>
                 </tr>
@@ -143,7 +142,6 @@ export default function AdminRevenue() {
                     <td className="py-3.5 text-charcoal-soft">{b.createdAt}</td>
                     <td className="py-3.5 font-semibold text-forest-dark">{b.propertyName}</td>
                     <td className="py-3.5 font-medium">{b.nights} nights</td>
-                    <td className="py-3.5 text-charcoal-soft">₹{b.cleaningFee || 0}</td>
                     <td className="py-3.5 text-charcoal-soft">₹{b.serviceFee || 0}</td>
                     <td className="py-3.5 text-right font-bold text-forest-dark">₹{b.totalAmount}</td>
                   </tr>

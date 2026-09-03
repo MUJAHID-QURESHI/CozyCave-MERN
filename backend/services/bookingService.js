@@ -14,6 +14,12 @@ const createPendingBooking = async (userId, payload) => {
     throw new Error('Property not found or is currently inactive.');
   }
 
+  // Cancel any prior abandoned pending bookings for this user so they don't block fresh checkout
+  await Booking.updateMany(
+    { customer: userId, bookingStatus: 'pending' },
+    { $set: { bookingStatus: 'cancelled', cancellationReason: 'Superseeded by new checkout' } }
+  );
+
   // 1. Check double bookings
   const isAvailable = await checkAvailability(propertyId, checkIn, checkOut);
   if (!isAvailable) {
@@ -40,7 +46,7 @@ const createPendingBooking = async (userId, payload) => {
     numberOfNights: pricing.numberOfNights,
     pricePerNight: pricing.pricePerNight,
     subtotal: pricing.subtotal,
-    cleaningFee: pricing.cleaningFee,
+    cleaningFee: 0,
     serviceFee: pricing.serviceFee,
     tax: 0,
     totalAmount: pricing.totalAmount,
@@ -62,8 +68,8 @@ const confirmBooking = async (bookingId, paymentInfo = {}) => {
     return booking;
   }
 
-  // Final confirmation check for dates
-  const isAvailable = await checkAvailability(booking.property, booking.checkIn, booking.checkOut);
+  // Final confirmation check for dates (excluding current booking ID to avoid self-conflict)
+  const isAvailable = await checkAvailability(booking.property, booking.checkIn, booking.checkOut, booking._id);
   if (!isAvailable) {
     booking.bookingStatus = 'cancelled';
     booking.paymentStatus = 'failed';

@@ -42,16 +42,16 @@ const calculatePrice = async (checkInDate, checkOutDate, property) => {
     }
   });
 
-  const cleaningFee = 75;
+  const cleaningFee = 0;
   const serviceFee = Math.round(subtotal * 0.08);
   const tax = 0;
-  const totalAmount = subtotal + cleaningFee + serviceFee;
+  const totalAmount = subtotal + serviceFee;
 
   return {
     numberOfNights: nights,
     pricePerNight: basePrice,
     subtotal,
-    cleaningFee,
+    cleaningFee: 0,
     serviceFee,
     tax: 0,
     totalAmount,

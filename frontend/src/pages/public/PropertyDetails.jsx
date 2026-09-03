@@ -262,7 +262,7 @@ export default function PropertyDetails() {
         let hasConflict = false;
         let tempDate = new Date(checkIn);
         const end = new Date(dateStr);
-        while (tempDate <= end) {
+        while (tempDate < end) {
           const tempStr = tempDate.toISOString().split('T')[0];
           if (isDateBlocked(tempStr)) {
             hasConflict = true;
@@ -314,10 +314,9 @@ export default function PropertyDetails() {
 
   // Dynamic fees based on booking nights
   const baseCost = pricingBreakdown ? pricingBreakdown.subtotal : (price * nights);
-  const cleaningFee = pricingBreakdown ? pricingBreakdown.cleaningFee : (nights > 0 ? 75 : 0);
   const serviceFee = pricingBreakdown ? pricingBreakdown.serviceFee : (nights > 0 ? Math.round((price * nights) * 0.08) : 0);
   const taxes = 0;
-  const totalAmount = pricingBreakdown ? pricingBreakdown.totalAmount : (baseCost + cleaningFee + serviceFee);
+  const totalAmount = pricingBreakdown ? pricingBreakdown.totalAmount : (baseCost + serviceFee);
 
   const handleBooking = (e) => {
     e.preventDefault();
@@ -339,7 +338,7 @@ export default function PropertyDetails() {
     let dateConflict = false;
     let tempDate = new Date(checkIn);
     const end = new Date(checkOut);
-    while (tempDate <= end) {
+    while (tempDate < end) {
       const dateStr = tempDate.toISOString().split('T')[0];
       if (isDateBlocked(dateStr)) {
         dateConflict = true;
@@ -364,7 +363,7 @@ export default function PropertyDetails() {
       nights,
       pricePerNight: pricingBreakdown ? pricingBreakdown.pricePerNight : price,
       subtotal: baseCost,
-      cleaningFee,
+      cleaningFee: 0,
       serviceFee,
       taxes: 0,
       totalAmount
@@ -866,10 +865,6 @@ export default function PropertyDetails() {
                       <div className="flex justify-between text-charcoal">
                         <span>{pricingBreakdown && pricingBreakdown.subtotal !== (price * nights) ? 'Stay subtotal (custom rates)' : `₹${price} × ${nights} nights`}</span>
                         <span>₹{baseCost}</span>
-                      </div>
-                      <div className="flex justify-between text-charcoal">
-                        <span>Cleaning fee</span>
-                        <span>₹{cleaningFee}</span>
                       </div>
                       <div className="flex justify-between text-charcoal">
                         <span>Service fee</span>

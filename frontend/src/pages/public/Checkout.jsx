@@ -60,8 +60,12 @@ export default function Checkout() {
   const {
     propertyId, propertyName, propertyImage, propertyLocation,
     checkIn, checkOut, guests, nights, pricePerNight,
-    cleaningFee, serviceFee, taxes, totalAmount
+    serviceFee
   } = currentBooking;
+
+  const displaySubtotal = currentBooking.subtotal || (pricePerNight * nights);
+  const displayServiceFee = serviceFee !== undefined ? serviceFee : Math.round(displaySubtotal * 0.08);
+  const displayTotal = displaySubtotal + displayServiceFee;
 
   const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
@@ -300,7 +304,7 @@ export default function Checkout() {
                     <span>Processing Payment...</span>
                   </>
                 ) : (
-                  <span>Pay & Confirm Booking (₹{totalAmount})</span>
+                  <span>Pay & Confirm Booking (₹{displayTotal})</span>
                 )}
               </button>
             </div>
@@ -359,19 +363,15 @@ export default function Checkout() {
               </h4>
               <div className="flex justify-between text-charcoal">
                 <span>₹{pricePerNight} × {nights} nights</span>
-                <span className="font-medium">₹{currentBooking.subtotal || (pricePerNight * nights)}</span>
-              </div>
-              <div className="flex justify-between text-charcoal">
-                <span>Cleaning fee</span>
-                <span className="font-medium">₹{cleaningFee}</span>
+                <span className="font-medium">₹{displaySubtotal}</span>
               </div>
               <div className="flex justify-between text-charcoal">
                 <span>Service fee</span>
-                <span className="font-medium">₹{serviceFee}</span>
+                <span className="font-medium">₹{displayServiceFee}</span>
               </div>
               <div className="flex justify-between font-bold text-forest-dark pt-3 border-t border-line text-[15.5px]">
                 <span>Total (INR)</span>
-                <span>₹{totalAmount}</span>
+                <span>₹{displayTotal}</span>
               </div>
             </div>
 

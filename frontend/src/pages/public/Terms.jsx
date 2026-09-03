@@ -23,7 +23,7 @@ export default function Terms() {
 
           <h3 className="font-fraunces text-xl font-semibold text-forest-dark mt-8">2. Pricing and Payments</h3>
           <p>
-            Prices are calculated dynamically based on price per night, cleaning fees, and service charges. Stays are locked upon payment confirmations.
+            Prices are calculated dynamically based on price per night and service charges. Stays are locked upon payment confirmations.
           </p>
 
           <h3 className="font-fraunces text-xl font-semibold text-forest-dark mt-8">3. Modifications & Cancellations</h3>

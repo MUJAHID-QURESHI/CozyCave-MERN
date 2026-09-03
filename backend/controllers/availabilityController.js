@@ -14,23 +14,19 @@ const getPropertyAvailability = async (req, res, next) => {
       ]
     });
 
-    // Also include dates from confirmed & pending bookings
+    // Also include dates from confirmed bookings
     const Booking = require('../models/Booking');
     const { getDatesInRange } = require('../services/availabilityService');
-    const activeBookings = await Booking.find({
+    const confirmedBookings = await Booking.find({
       property: req.params.propertyId,
-      bookingStatus: { $in: ['confirmed', 'pending'] }
+      bookingStatus: 'confirmed'
     });
 
     const bookedDateSet = new Set(list.filter(i => i.status === 'booked' || i.status === 'blocked').map(i => i.date));
     const additionalBookedItems = [];
 
-    activeBookings.forEach(b => {
+    confirmedBookings.forEach(b => {
       const bDates = getDatesInRange(b.checkIn, b.checkOut);
-      const coDate = new Date(b.checkOut).toISOString().split('T')[0];
-      if (!bDates.includes(coDate)) {
-        bDates.push(coDate);
-      }
       bDates.forEach(d => {
         if (!bookedDateSet.has(d)) {
           bookedDateSet.add(d);

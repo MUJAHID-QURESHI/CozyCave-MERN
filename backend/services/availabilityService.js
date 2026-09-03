@@ -15,30 +15,40 @@ const getDatesInRange = (startDate, endDate) => {
 };
 
 // Check if a property is available for a date range
-const checkAvailability = async (propertyId, checkIn, checkOut) => {
+const checkAvailability = async (propertyId, checkIn, checkOut, excludeBookingId = null) => {
   const requiredDates = getDatesInRange(checkIn, checkOut);
   if (requiredDates.length === 0) return false;
 
   // 1. Find any records that match the property and dates with status booked or blocked
-  const conflicts = await Availability.find({
+  const availFilter = {
     property: propertyId,
     date: { $in: requiredDates },
     status: { $in: ['booked', 'blocked'] },
-  });
+  };
+  if (excludeBookingId) {
+    availFilter.booking = { $ne: excludeBookingId };
+  }
 
+  const conflicts = await Availability.find(availFilter);
   if (conflicts.length > 0) return false;
 
-  // 2. Strict overlap check against active reservations
+  // 2. Strict overlap check against confirmed reservations
   const Booking = require('../models/Booking');
   const reqStart = new Date(checkIn);
   const reqEnd = new Date(checkOut);
 
-  const existingBookingConflict = await Booking.findOne({
+  const bookingQuery = {
     property: propertyId,
-    bookingStatus: { $in: ['confirmed', 'pending'] },
+    bookingStatus: 'confirmed',
     checkIn: { $lt: reqEnd },
     checkOut: { $gt: reqStart },
-  });
+  };
+
+  if (excludeBookingId) {
+    bookingQuery._id = { $ne: excludeBookingId };
+  }
+
+  const existingBookingConflict = await Booking.findOne(bookingQuery);
 
   return !existingBookingConflict;
 };
