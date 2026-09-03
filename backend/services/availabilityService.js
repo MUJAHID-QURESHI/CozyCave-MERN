@@ -19,14 +19,28 @@ const checkAvailability = async (propertyId, checkIn, checkOut) => {
   const requiredDates = getDatesInRange(checkIn, checkOut);
   if (requiredDates.length === 0) return false;
 
-  // Find any records that match the property and dates with status booked or blocked
+  // 1. Find any records that match the property and dates with status booked or blocked
   const conflicts = await Availability.find({
     property: propertyId,
     date: { $in: requiredDates },
     status: { $in: ['booked', 'blocked'] },
   });
 
-  return conflicts.length === 0;
+  if (conflicts.length > 0) return false;
+
+  // 2. Strict overlap check against active reservations
+  const Booking = require('../models/Booking');
+  const reqStart = new Date(checkIn);
+  const reqEnd = new Date(checkOut);
+
+  const existingBookingConflict = await Booking.findOne({
+    property: propertyId,
+    bookingStatus: { $in: ['confirmed', 'pending'] },
+    checkIn: { $lt: reqEnd },
+    checkOut: { $gt: reqStart },
+  });
+
+  return !existingBookingConflict;
 };
 
 // Block dates manually (admin)

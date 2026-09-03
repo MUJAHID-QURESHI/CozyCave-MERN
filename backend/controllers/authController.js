@@ -146,6 +146,17 @@ const updateUserProfile = async (req, res, next) => {
       user.name = req.body.name || user.name;
       user.mobile = req.body.mobile || user.mobile;
       if (req.body.password) {
+        if (req.body.currentPassword) {
+          const isMatch = await user.comparePassword(req.body.currentPassword);
+          if (!isMatch) {
+            res.status(400);
+            throw new Error('Current password does not match.');
+          }
+        }
+        if (req.body.password.length < 6) {
+          res.status(400);
+          throw new Error('New password must be at least 6 characters long.');
+        }
         user.password = req.body.password;
       }
       if (req.body.profileImage !== undefined) {

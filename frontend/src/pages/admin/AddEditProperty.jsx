@@ -29,6 +29,17 @@ export default function AddEditProperty() {
   const [beds, setBeds] = useState(2);
   const [bathrooms, setBathrooms] = useState(2);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [availableAmenities, setAvailableAmenities] = useState(() => {
+    const baseNames = mockAmenities.map(a => a.name);
+    try {
+      const saved = localStorage.getItem('cozycave_custom_amenities');
+      const custom = saved ? JSON.parse(saved) : [];
+      return Array.from(new Set([...baseNames, ...custom]));
+    } catch {
+      return baseNames;
+    }
+  });
+  const [newAmenityInput, setNewAmenityInput] = useState('');
   const [rulesInput, setRulesInput] = useState('');
   const [checkInTime, setCheckInTime] = useState('03:00 PM');
   const [checkOutTime, setCheckOutTime] = useState('11:00 AM');
@@ -61,7 +72,10 @@ export default function AddEditProperty() {
         setBedrooms(match.bedrooms || 2);
         setBeds(match.beds || 2);
         setBathrooms(match.bathrooms || 2);
-        setSelectedAmenities(match.amenities || []);
+        if (match.amenities && match.amenities.length > 0) {
+          setSelectedAmenities(match.amenities);
+          setAvailableAmenities(prev => Array.from(new Set([...prev, ...match.amenities])));
+        }
         setRulesInput(match.houseRules ? match.houseRules.join('\n') : '');
         setGoogleMapUrl(match.googleMapUrl || '');
         setCheckInTime(match.checkInTime || '03:00 PM');
@@ -72,6 +86,40 @@ export default function AddEditProperty() {
       }
     }
   }, [id, isEditMode, properties]);
+
+  const handleAddNewAmenity = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = newAmenityInput.trim();
+    if (!trimmed) {
+      dispatch(addToast({ message: 'Please enter an amenity name', type: 'warning' }));
+      return;
+    }
+    const match = availableAmenities.find(a => a.toLowerCase() === trimmed.toLowerCase());
+    if (match) {
+      if (!selectedAmenities.includes(match)) {
+        setSelectedAmenities(prev => [...prev, match]);
+      }
+      setNewAmenityInput('');
+      dispatch(addToast({ message: `"${match}" is selected`, type: 'info' }));
+      return;
+    }
+
+    const updated = [...availableAmenities, trimmed];
+    setAvailableAmenities(updated);
+    setSelectedAmenities(prev => [...prev, trimmed]);
+    setNewAmenityInput('');
+
+    try {
+      const saved = localStorage.getItem('cozycave_custom_amenities');
+      const customList = saved ? JSON.parse(saved) : [];
+      if (!customList.includes(trimmed)) {
+        localStorage.setItem('cozycave_custom_amenities', JSON.stringify([...customList, trimmed]));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    dispatch(addToast({ message: `Added "${trimmed}" and selected it!`, type: 'success' }));
+  };
 
   const handleAmenityToggle = (name) => {
     if (selectedAmenities.includes(name)) {
@@ -405,23 +453,53 @@ export default function AddEditProperty() {
               </div>
 
               {/* Checklist: Amenities */}
-              <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">Stays Amenities</label>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">
+                    Stays Amenities ({selectedAmenities.length} selected)
+                  </label>
+                  
+                  {/* Add Custom Amenity Inline Form */}
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text"
+                      placeholder="Add custom amenity (e.g. Mountain View)..."
+                      value={newAmenityInput}
+                      onChange={(e) => setNewAmenityInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddNewAmenity(e);
+                        }
+                      }}
+                      className="bg-white border border-line rounded-lg py-1.5 px-3 text-[12.5px] text-forest-dark focus:outline-none focus:border-forest w-56 sm:w-64"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddNewAmenity}
+                      className="px-3 py-1.5 bg-forest hover:bg-forest-light text-white text-[12px] font-semibold rounded-lg flex items-center gap-1 transition-colors shadow-sm cursor-pointer whitespace-nowrap"
+                    >
+                      <Plus size={14} />
+                      Add Amenity
+                    </button>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-cream/15 p-4 border border-line rounded-xl">
-                  {mockAmenities.map((amen) => {
-                    const checked = selectedAmenities.includes(amen.name);
+                  {availableAmenities.map((amenName) => {
+                    const checked = selectedAmenities.includes(amenName);
                     return (
                       <label 
-                        key={amen.id} 
+                        key={amenName} 
                         className="flex items-center gap-2.5 text-[13px] text-charcoal font-medium cursor-pointer select-none"
                       >
                         <input 
                           type="checkbox" 
                           checked={checked}
-                          onChange={() => handleAmenityToggle(amen.name)}
+                          onChange={() => handleAmenityToggle(amenName)}
                           className="w-4 h-4 rounded border-line text-forest focus:ring-forest cursor-pointer"
                         />
-                        <span className={checked ? 'text-forest font-bold' : ''}>{amen.name}</span>
+                        <span className={checked ? 'text-forest font-bold' : ''}>{amenName}</span>
                       </label>
                     );
                   })}

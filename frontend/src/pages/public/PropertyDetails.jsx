@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
-  Star, MapPin, Calendar, Users, Coffee, ShowerHead, Bed, Home, AlertCircle, ChevronDown, CheckCircle, ChevronLeft, ChevronRight
+  Star, MapPin, Calendar, Users, Coffee, ShowerHead, Bed, Home, AlertCircle, ChevronDown, CheckCircle, ChevronLeft, ChevronRight, X, Maximize2
 } from 'lucide-react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
@@ -25,6 +25,45 @@ export default function PropertyDetails() {
   const [children, setChildren] = useState(0);
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+
+  // Fullscreen Lightbox state
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIdx, setLightboxIdx] = useState(0);
+
+  const openLightbox = (idx) => {
+    setLightboxIdx(idx);
+    setIsLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+  };
+
+  const handlePrevImage = (e) => {
+    if (e) e.stopPropagation();
+    const imgs = selectedProperty?.images || [];
+    if (imgs.length === 0) return;
+    setLightboxIdx((prev) => (prev === 0 ? imgs.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e) => {
+    if (e) e.stopPropagation();
+    const imgs = selectedProperty?.images || [];
+    if (imgs.length === 0) return;
+    setLightboxIdx((prev) => (prev === imgs.length - 1 ? 0 : prev + 1));
+  };
+
+  // Keyboard navigation for Lightbox
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isLightboxOpen) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') handlePrevImage();
+      if (e.key === 'ArrowRight') handleNextImage();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLightboxOpen, selectedProperty]);
 
   // New review submission form state
   const [reviewsList, setReviewsList] = useState([]);
@@ -219,15 +258,13 @@ export default function PropertyDetails() {
       if (dateStr <= checkIn) {
         setCheckIn(dateStr);
       } else {
-        // Check if there are any blocked/booked dates in the range between checkIn and selected date
+        // Strict overlap check: ensure no date from checkIn to checkout date is blocked/booked
         let hasConflict = false;
         let tempDate = new Date(checkIn);
         const end = new Date(dateStr);
-        while (tempDate < end) {
+        while (tempDate <= end) {
           const tempStr = tempDate.toISOString().split('T')[0];
-          const record = availabilityList.find(a => a.date === tempStr);
-          const isBlocked = (record && (record.status === 'blocked' || record.status === 'booked')) || (blockedDates && blockedDates.includes(tempStr));
-          if (isBlocked) {
+          if (isDateBlocked(tempStr)) {
             hasConflict = true;
             break;
           }
@@ -235,7 +272,8 @@ export default function PropertyDetails() {
         }
 
         if (hasConflict) {
-          dispatch(addToast({ message: 'Selected range contains blocked dates. Please pick another range.', type: 'error' }));
+          dispatch(addToast({ message: 'Selected date range overlaps with an existing reservation. Please pick another range.', type: 'error' }));
+          return;
         } else {
           setCheckOut(dateStr);
           setShowCalendar(false);
@@ -264,8 +302,14 @@ export default function PropertyDetails() {
 
   // Date availability and price calculation helper
   const isDateBlocked = (dateStr) => {
-    if (!blockedDates) return false;
-    return blockedDates.includes(dateStr);
+    const record = availabilityList.find(a => a.date === dateStr);
+    if (record && (record.status === 'blocked' || record.status === 'booked')) {
+      return true;
+    }
+    if (blockedDates && blockedDates.includes(dateStr)) {
+      return true;
+    }
+    return false;
   };
 
   // Dynamic fees based on booking nights
@@ -291,11 +335,11 @@ export default function PropertyDetails() {
       return;
     }
 
-    // Check if dates are blocked
+    // Check if dates are blocked or conflict with an existing reservation
     let dateConflict = false;
     let tempDate = new Date(checkIn);
     const end = new Date(checkOut);
-    while (tempDate < end) {
+    while (tempDate <= end) {
       const dateStr = tempDate.toISOString().split('T')[0];
       if (isDateBlocked(dateStr)) {
         dateConflict = true;
@@ -305,7 +349,7 @@ export default function PropertyDetails() {
     }
 
     if (dateConflict) {
-      dispatch(addToast({ message: 'Selected dates conflict with existing bookings. Please pick other dates.', type: 'error' }));
+      dispatch(addToast({ message: 'Selected dates conflict with an existing reservation. Please pick other dates.', type: 'error' }));
       return;
     }
 
@@ -390,13 +434,23 @@ export default function PropertyDetails() {
         {/* Premium Image Gallery */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 rounded-2xl overflow-hidden shadow-sm">
           {/* Main Large Image */}
-          <div className="md:col-span-2 h-[340px] md:h-[450px] bg-cream relative">
+          <div 
+            onClick={() => openLightbox(activeImageIdx)}
+            className="md:col-span-2 h-[340px] md:h-[450px] bg-cream relative cursor-pointer group overflow-hidden"
+            title="Click to view full photo gallery"
+          >
             {images && images.length > 0 ? (
-              <img 
-                src={images[activeImageIdx]} 
-                alt={`${name} gallery view`} 
-                className="w-full h-full object-cover transition-all duration-300"
-              />
+              <>
+                <img 
+                  src={images[activeImageIdx]} 
+                  alt={`${name} gallery view`} 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
+                />
+                <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/60 hover:bg-black/80 text-white text-xs font-semibold rounded-lg backdrop-blur-sm flex items-center gap-1.5 transition-colors">
+                  <Maximize2 size={13} />
+                  <span>Expand Photo ({activeImageIdx + 1}/{images.length})</span>
+                </div>
+              </>
             ) : (
               <div className="photo"><span className="photo-label">Gallery photo</span></div>
             )}
@@ -406,12 +460,16 @@ export default function PropertyDetails() {
             {images && images.map((img, idx) => (
               <div 
                 key={idx}
-                onClick={() => setActiveImageIdx(idx)}
-                className={`cursor-pointer rounded-lg overflow-hidden border-2 h-[100px] md:h-[140px] bg-cream relative transition-all ${
+                onClick={() => {
+                  setActiveImageIdx(idx);
+                  openLightbox(idx);
+                }}
+                className={`cursor-pointer rounded-lg overflow-hidden border-2 h-[100px] md:h-[140px] bg-cream relative transition-all group ${
                   activeImageIdx === idx ? 'border-gold shadow-md' : 'border-transparent hover:border-cream-deep'
                 }`}
+                title="Click to expand this photo"
               >
-                <img src={img} alt="thumbnail" className="w-full h-full object-cover" />
+                <img src={img} alt="thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               </div>
             ))}
           </div>
@@ -843,6 +901,94 @@ export default function PropertyDetails() {
         </div>
 
       </main>
+
+      {/* Fullscreen Interactive Image Lightbox Slider */}
+      {isLightboxOpen && images && images.length > 0 && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 sm:p-6 backdrop-blur-sm select-none animate-in fade-in duration-200"
+          onClick={closeLightbox}
+        >
+          {/* Top Bar: Counter, Title, Close button */}
+          <div className="flex items-center justify-between text-white z-10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-semibold tracking-wider text-cream">
+                {lightboxIdx + 1} / {images.length}
+              </span>
+              <span className="text-sm font-medium text-cream-soft hidden sm:inline-block truncate max-w-md">
+                {name}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={closeLightbox}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+              title="Close (Esc)"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Main Image Stage with Next & Prev buttons */}
+          <div className="relative flex-1 flex items-center justify-center my-2 max-h-[78vh]">
+            {/* Previous Button */}
+            {images.length > 1 && (
+              <button
+                type="button"
+                onClick={handlePrevImage}
+                className="absolute left-2 sm:left-6 z-20 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/50 hover:bg-black/80 border border-white/20 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                title="Previous photo (Left arrow)"
+              >
+                <ChevronLeft size={26} />
+              </button>
+            )}
+
+            {/* The Active Single Photo */}
+            <div 
+              className="w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={images[lightboxIdx]} 
+                alt={`${name} view ${lightboxIdx + 1}`}
+                className="max-h-[75vh] max-w-full object-contain rounded-xl shadow-2xl transition-all duration-300"
+              />
+            </div>
+
+            {/* Next Button */}
+            {images.length > 1 && (
+              <button
+                type="button"
+                onClick={handleNextImage}
+                className="absolute right-2 sm:right-6 z-20 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/50 hover:bg-black/80 border border-white/20 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                title="Next photo (Right arrow)"
+              >
+                <ChevronRight size={26} />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails Strip */}
+          {images.length > 1 && (
+            <div 
+              className="flex items-center justify-center gap-2 overflow-x-auto py-2 z-10 px-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {images.map((img, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setLightboxIdx(idx)}
+                  className={`w-14 h-11 sm:w-18 sm:h-13 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer ${
+                    lightboxIdx === idx ? 'border-gold scale-105 shadow-md' : 'border-white/20 opacity-50 hover:opacity-100'
+                  }`}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <Footer />
     </div>

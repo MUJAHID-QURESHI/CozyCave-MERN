@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Save, Shield, Settings, Phone, Plus, Trash2 } from 'lucide-react';
+import { Save, Shield, Settings, Phone, Plus, Trash2, Lock, Key } from 'lucide-react';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
 import { fetchPortalSettings, savePortalSettings } from '../../redux/slices/settingsSlice';
 import { addToast } from '../../redux/slices/uiSlice';
+import api from '../../services/api';
 
 export default function AdminSettings() {
   const dispatch = useDispatch();
@@ -27,6 +28,12 @@ export default function AdminSettings() {
   const [serviceFeePercent, setServiceFeePercent] = useState(reduxFee);
   const [maintenanceMode, setMaintenanceMode] = useState(reduxMaintenance);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Admin password update state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   // Sync state with loaded Redux values
   useEffect(() => {
@@ -82,6 +89,41 @@ export default function AdminSettings() {
       dispatch(addToast({ message: 'Configuration settings saved successfully!', type: 'success' }));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    if (!currentPassword) {
+      dispatch(addToast({ message: 'Please enter your current password', type: 'warning' }));
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      dispatch(addToast({ message: 'New password must be at least 6 characters long', type: 'warning' }));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      dispatch(addToast({ message: 'New password and confirm password do not match', type: 'error' }));
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      await api.put('/auth/profile', {
+        currentPassword,
+        password: newPassword
+      });
+      dispatch(addToast({ message: 'Admin password updated successfully!', type: 'success' }));
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      dispatch(addToast({ 
+        message: err.response?.data?.message || 'Failed to update password. Please check your current password.', 
+        type: 'error' 
+      }));
+    } finally {
+      setIsUpdatingPassword(false);
     }
   };
 
@@ -234,6 +276,66 @@ export default function AdminSettings() {
                 <span>{isSaving ? 'Saving Configuration...' : 'Save Configuration'}</span>
               </button>
 
+            </form>
+          </div>
+
+          {/* Admin Security & Password Card */}
+          <div className="bg-white border border-line rounded-2xl shadow-sm p-6 sm:p-8">
+            <h3 className="font-fraunces text-xl font-semibold text-forest-dark mb-2 flex items-center gap-2">
+              <Lock size={20} className="text-forest" />
+              Admin Security & Password
+            </h3>
+            <p className="text-[13px] text-charcoal-soft mb-6 pb-4 border-b border-line">
+              Update your administrator login credentials. Minimum 6 characters required.
+            </p>
+
+            <form onSubmit={handleUpdatePassword} className="flex flex-col gap-4 max-w-lg">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">Current Password</label>
+                <input 
+                  type="password"
+                  value={currentPassword}
+                  placeholder="Enter current password"
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none focus:border-forest"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">New Password</label>
+                  <input 
+                    type="password"
+                    value={newPassword}
+                    placeholder="At least 6 characters"
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none focus:border-forest"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-charcoal uppercase tracking-wider">Confirm New Password</label>
+                  <input 
+                    type="password"
+                    value={confirmPassword}
+                    placeholder="Repeat new password"
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-cream/30 border border-line rounded-xl py-2.5 px-4 text-[13.5px] text-forest-dark font-medium focus:outline-none focus:border-forest"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isUpdatingPassword}
+                className="mt-2 py-3 px-6 bg-forest hover:bg-forest-light text-white font-semibold rounded-xl text-[13.5px] shadow-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer self-start"
+              >
+                <Key size={15} />
+                <span>{isUpdatingPassword ? 'Updating Password...' : 'Update Password'}</span>
+              </button>
             </form>
           </div>
 
