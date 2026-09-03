@@ -135,7 +135,7 @@ export default function BookingConfirmation() {
                 <span className="text-[12px] text-charcoal-soft font-normal">All fees included</span>
               </div>
               <div className="font-inter text-2xl font-bold text-forest-dark">
-                ${totalAmount}
+                ₹{totalAmount}
               </div>
             </div>
 

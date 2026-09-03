@@ -300,7 +300,7 @@ export default function Checkout() {
                     <span>Processing Payment...</span>
                   </>
                 ) : (
-                  <span>Pay & Confirm Booking (${totalAmount})</span>
+                  <span>Pay & Confirm Booking (₹{totalAmount})</span>
                 )}
               </button>
             </div>

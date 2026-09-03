@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, MapPin, DollarSign, XCircle, Info, Star } from 'lucide-react';
+import { Calendar, Users, MapPin, XCircle, Info, Star } from 'lucide-react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { fetchMyBookings, cancelBookingThunk } from '../../redux/slices/bookingSlice';

@@ -10,7 +10,7 @@ const settingsSchema = new mongoose.Schema(
       default: ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175'] 
     },
     supportAddress: { type: String, default: '' },
-    whatsappLink: { type: String, default: 'https://wa.me/18285550173' },
+    whatsappLink: { type: String, default: 'https://wa.me/917999851384' },
     taxPercent: { type: Number, default: 0 },
     serviceFeePercent: { type: Number, default: 8 },
     maintenanceMode: { type: Boolean, default: false }

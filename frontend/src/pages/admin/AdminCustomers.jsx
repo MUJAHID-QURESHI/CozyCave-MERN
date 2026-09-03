@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Users, Mail, Phone, Calendar, DollarSign, Briefcase } from 'lucide-react';
+import { Users, Mail, Phone, Calendar, Briefcase } from 'lucide-react';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
 

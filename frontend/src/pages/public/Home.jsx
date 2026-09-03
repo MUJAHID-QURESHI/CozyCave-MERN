@@ -245,12 +245,9 @@ export default function Home() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-b from-[#051e1a]/0 via-[#051e1a]/20 to-[#051e1a]/85" />
                   <div className="dest-label absolute bottom-0 left-0 right-0 z-10 p-5">
-                    <h4 className="text-white font-fraunces text-[19px] font-medium mb-1">
+                    <h4 className="text-white font-fraunces text-[19px] font-medium">
                       {dest.name}
                     </h4>
-                    <p className="text-cream/80 font-inter text-[12.5px] font-medium">
-                      {dest.stays} stays available
-                    </p>
                   </div>
                 </RouterLink>
               );

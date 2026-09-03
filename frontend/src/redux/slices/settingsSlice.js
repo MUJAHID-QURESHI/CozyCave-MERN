@@ -51,7 +51,7 @@ const initialState = {
   supportEmail: cachedSettings?.supportEmail || 'hello@thecozycave.com',
   supportPhone: cachedSettings?.supportPhone || '+1 (828) 555-0173',
   supportPhones: cachedSettings?.supportPhones || ['+1 (828) 555-0173', '+1 (828) 555-0174', '+1 (828) 555-0175'],
-  whatsappLink: cachedSettings?.whatsappLink || 'https://wa.me/18285550173',
+  whatsappLink: cachedSettings?.whatsappLink || 'https://wa.me/917999851384',
   serviceFeePercent: cachedSettings?.serviceFeePercent !== undefined ? cachedSettings.serviceFeePercent : 8,
   maintenanceMode: cachedSettings?.maintenanceMode || false,
   loading: false,

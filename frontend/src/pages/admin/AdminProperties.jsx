@@ -93,7 +93,7 @@ export default function AdminProperties() {
                     </td>
 
                     {/* Price */}
-                    <td className="p-4 font-bold text-forest-dark">${p.price}</td>
+                    <td className="p-4 font-bold text-forest-dark">₹{p.price}</td>
 
                     {/* Capacity details */}
                     <td className="p-4 text-charcoal-soft">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import { DollarSign, Landmark, TrendingUp, Award, Calendar } from 'lucide-react';
+import { IndianRupee, Landmark, TrendingUp, Award, Calendar } from 'lucide-react';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
 import { mockRevenueStats } from '../../data/mockData';
@@ -30,7 +30,7 @@ export default function AdminRevenue() {
   }, []);
 
   const stats = [
-    { name: 'Gross Income', value: `₹${totalEarnings.toLocaleString()}`, desc: 'Earnings across all active bookings', icon: DollarSign, color: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
+    { name: 'Gross Income', value: `₹${totalEarnings.toLocaleString()}`, desc: 'Earnings across all active bookings', icon: IndianRupee, color: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
     { name: 'Average Transaction', value: `₹${averageEarnings}`, desc: 'Average earnings per stay order', icon: Landmark, color: 'text-gold bg-amber-50 border-amber-100' },
     { name: 'Nights Booked', value: `${totalNights} nights`, desc: 'Occupancy nights summary count', icon: Calendar, color: 'text-blue-700 bg-blue-50 border-blue-100' },
   ];

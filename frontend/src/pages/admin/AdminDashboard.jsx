@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { 
-  Home, FileText, Calendar, DollarSign, Users, Award, TrendingUp 
+  Home, FileText, Calendar, IndianRupee, Users, Award, TrendingUp 
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend 
@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   const stats = [
     { name: 'Total Properties', value: totalProperties, desc: `${activeProperties} active stays`, icon: Home, color: 'text-blue-600 bg-blue-50 border-blue-100' },
     { name: 'Total Bookings', value: totalBookings, desc: `${pendingBookings} pending approval`, icon: FileText, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
-    { name: 'Monthly Revenue', value: `₹${totalRevenue.toLocaleString()}`, desc: '+12.4% vs last month', icon: DollarSign, color: 'text-gold bg-amber-50 border-amber-100' },
+    { name: 'Monthly Revenue', value: `₹${totalRevenue.toLocaleString()}`, desc: '+12.4% vs last month', icon: IndianRupee, color: 'text-gold bg-amber-50 border-amber-100' },
     { name: 'Occupancy Rate', value: '78%', desc: 'Avg. 22 nights/property', icon: TrendingUp, color: 'text-purple-600 bg-purple-50 border-purple-100' },
   ];
 
