@@ -42,8 +42,20 @@ const calculatePrice = async (checkInDate, checkOutDate, property) => {
     }
   });
 
+  const Settings = require('../models/Settings');
+  let feePercent = 2;
+  try {
+    const portalSettings = await Settings.findOne();
+    if (portalSettings && portalSettings.serviceFeePercent !== undefined && portalSettings.serviceFeePercent !== null) {
+      feePercent = portalSettings.serviceFeePercent;
+    }
+  } catch (err) {
+    console.error('Error fetching settings for fee calculation:', err.message);
+  }
+
   const cleaningFee = 0;
-  const serviceFee = Math.round(subtotal * 0.08);
+  // Dynamic service fee rounded off
+  const serviceFee = Math.ceil(subtotal * (feePercent / 100));
   const tax = 0;
   const totalAmount = subtotal + serviceFee;
 

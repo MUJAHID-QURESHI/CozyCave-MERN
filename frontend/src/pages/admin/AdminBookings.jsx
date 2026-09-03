@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Search, Eye, XCircle, CheckCircle, Trash2 } from 'lucide-react';
+import { Search, Eye, XCircle, CheckCircle, Trash2, Filter, ChevronDown, Check } from 'lucide-react';
 import AdminSidebar from '../../components/layout/AdminSidebar';
 import AdminNavbar from '../../components/layout/AdminNavbar';
 import { updateBookingStatus, deleteBooking } from '../../redux/slices/bookingSlice';
@@ -14,6 +14,63 @@ export default function AdminBookings() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('#status-filter-container')) {
+        setIsStatusDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const totalCount = bookings.length;
+  const pendingCount = bookings.filter(b => b.status === 'Pending').length;
+  const confirmedCount = bookings.filter(b => b.status === 'Confirmed').length;
+  const completedCount = bookings.filter(b => b.status === 'Completed').length;
+  const cancelledCount = bookings.filter(b => b.status === 'Cancelled').length;
+
+  const statusOptions = [
+    { 
+      label: 'All Bookings', 
+      value: '', 
+      count: totalCount,
+      color: 'bg-cream-deep/60 text-forest-dark border-line',
+      dot: 'bg-forest'
+    },
+    { 
+      label: 'Pending', 
+      value: 'Pending', 
+      count: pendingCount,
+      color: 'bg-amber-50 text-amber-800 border-amber-200',
+      dot: 'bg-amber-500'
+    },
+    { 
+      label: 'Confirmed', 
+      value: 'Confirmed', 
+      count: confirmedCount,
+      color: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+      dot: 'bg-emerald-500'
+    },
+    { 
+      label: 'Completed', 
+      value: 'Completed', 
+      count: completedCount,
+      color: 'bg-blue-50 text-blue-800 border-blue-200',
+      dot: 'bg-blue-500'
+    },
+    { 
+      label: 'Cancelled', 
+      value: 'Cancelled', 
+      count: cancelledCount,
+      color: 'bg-rose-50 text-rose-800 border-rose-200',
+      dot: 'bg-rose-500'
+    },
+  ];
+
+  const currentOption = statusOptions.find(o => o.value === statusFilter) || statusOptions[0];
 
   const handleUpdateStatus = (id, status) => {
     dispatch(updateBookingStatus({ bookingId: id, status }));
@@ -66,20 +123,63 @@ export default function AdminBookings() {
               <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal-soft" />
             </div>
 
-            {/* Status Dropdown */}
-            <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
-              <label className="text-[12px] font-bold text-charcoal-soft uppercase tracking-wider">Status:</label>
-              <select 
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-white border border-line rounded-xl py-2 px-3 text-[13px] font-semibold text-forest-dark focus:outline-none cursor-pointer"
+            {/* Dynamic Colorful Status Dropdown */}
+            <div id="status-filter-container" className="relative flex items-center gap-2 self-stretch sm:self-auto justify-end">
+              <label className="text-[12px] font-bold text-charcoal-soft uppercase tracking-wider flex items-center gap-1">
+                <Filter size={13} className="text-forest" />
+                Status:
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                className={`bg-white border rounded-xl py-2 px-3.5 text-[13px] font-semibold text-forest-dark shadow-sm flex items-center gap-2 transition-all cursor-pointer hover:border-forest/50 ${
+                  isStatusDropdownOpen ? 'border-forest ring-2 ring-forest/10' : 'border-line'
+                }`}
               >
-                <option value="">All Bookings</option>
-                <option value="Pending">Pending</option>
-                <option value="Confirmed">Confirmed</option>
-                <option value="Completed">Completed</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
+                <span className={`w-2 h-2 rounded-full ${currentOption.dot}`} />
+                <span>{currentOption.label}</span>
+                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-cream text-charcoal-soft border border-line/60">
+                  {currentOption.count}
+                </span>
+                <ChevronDown size={14} className={`text-charcoal-soft transition-transform duration-200 ${isStatusDropdownOpen ? 'rotate-180 text-forest' : ''}`} />
+              </button>
+
+              {/* Animated Dropdown Menu */}
+              {isStatusDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-line rounded-2xl shadow-xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 text-[10.5px] font-bold uppercase tracking-wider text-charcoal-soft border-b border-line/50 mb-1">
+                    Filter by Status
+                  </div>
+                  {statusOptions.map((opt) => {
+                    const isSelected = statusFilter === opt.value;
+                    return (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        onClick={() => {
+                          setStatusFilter(opt.value);
+                          setIsStatusDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium transition-colors cursor-pointer ${
+                          isSelected ? 'bg-forest/5 font-semibold text-forest-dark' : 'hover:bg-cream/40 text-charcoal'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2.5 h-2.5 rounded-full ${opt.dot}`} />
+                          <span>{opt.label}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${opt.color}`}>
+                            {opt.count}
+                          </span>
+                          {isSelected && <Check size={14} className="text-forest" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 

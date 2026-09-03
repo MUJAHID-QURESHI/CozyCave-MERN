@@ -24,6 +24,7 @@ export default function Checkout() {
   
   const { currentBooking } = useSelector((state) => state.bookings);
   const { user } = useSelector((state) => state.auth);
+  const { serviceFeePercent = 2 } = useSelector((state) => state.settings);
 
   // Form states
   const [fullName, setFullName] = useState('');
@@ -64,7 +65,8 @@ export default function Checkout() {
   } = currentBooking;
 
   const displaySubtotal = currentBooking.subtotal || (pricePerNight * nights);
-  const displayServiceFee = serviceFee !== undefined ? serviceFee : Math.round(displaySubtotal * 0.08);
+  const feePercent = (serviceFeePercent !== undefined && serviceFeePercent !== null) ? Number(serviceFeePercent) : 2;
+  const displayServiceFee = serviceFee !== undefined ? serviceFee : Math.ceil(displaySubtotal * (feePercent / 100));
   const displayTotal = displaySubtotal + displayServiceFee;
 
   const handleCheckoutSubmit = async (e) => {

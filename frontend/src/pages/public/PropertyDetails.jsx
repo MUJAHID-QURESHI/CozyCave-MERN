@@ -18,6 +18,7 @@ export default function PropertyDetails() {
   
   const { selectedProperty } = useSelector((state) => state.properties);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { serviceFeePercent = 2 } = useSelector((state) => state.settings);
 
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
@@ -314,7 +315,10 @@ export default function PropertyDetails() {
 
   // Dynamic fees based on booking nights
   const baseCost = pricingBreakdown ? pricingBreakdown.subtotal : (price * nights);
-  const serviceFee = pricingBreakdown ? pricingBreakdown.serviceFee : (nights > 0 ? Math.round((price * nights) * 0.08) : 0);
+  const feePercent = (serviceFeePercent !== undefined && serviceFeePercent !== null) ? Number(serviceFeePercent) : 2;
+  const serviceFee = pricingBreakdown 
+    ? pricingBreakdown.serviceFee 
+    : (nights > 0 ? Math.ceil((price * nights) * (feePercent / 100)) : 0);
   const taxes = 0;
   const totalAmount = pricingBreakdown ? pricingBreakdown.totalAmount : (baseCost + serviceFee);
 

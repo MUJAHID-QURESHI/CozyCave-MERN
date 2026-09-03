@@ -112,7 +112,7 @@ export default function AdminCustomers() {
 
                     {/* Spending total */}
                     <td className="p-4 text-right font-bold text-forest-dark text-[14.5px]">
-                      ${c.totalSpend.toLocaleString()}
+                      ₹{c.totalSpend.toLocaleString()}
                     </td>
                   </tr>
                 ))}
