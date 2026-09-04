@@ -570,7 +570,17 @@ export default function PropertyDetails() {
                 </div>
                 <div>
                   <h4 className="font-fraunces text-md font-semibold text-forest-dark mb-1">Cancellation Policy</h4>
-                  <p className="text-[13px] text-charcoal-soft leading-normal">{cancellationPolicy}</p>
+                  <p className="text-[13px] text-charcoal-soft leading-normal">
+                    {cancellationPolicy && cancellationPolicy !== 'Flexible cancellation.'
+                      ? cancellationPolicy 
+                      : 'Full refund (minus service fee) up to 7 days before check-in. 50% refund between 7 days and 48 hours. Non-refundable within 48 hours.'}
+                  </p>
+                  <Link 
+                    to="/cancellation-policy" 
+                    className="inline-block mt-1.5 text-[12px] font-semibold text-forest hover:text-forest-dark underline"
+                  >
+                    View detailed cancellation & refund policy →
+                  </Link>
                 </div>
               </div>
             </div>

@@ -146,7 +146,12 @@ const cancelBookingByUser = async (userId, bookingId, reason = 'Cancelled by use
     property: booking.property,
     date: { $in: dates },
     status: 'booked',
-    booking: booking._id,
+    $or: [
+      { booking: booking._id },
+      { booking: String(booking._id) },
+      { booking: { $exists: false } },
+      { booking: null }
+    ]
   });
 
   // Notify customer
