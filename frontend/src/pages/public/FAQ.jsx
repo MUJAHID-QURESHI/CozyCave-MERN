@@ -20,7 +20,7 @@ export default function FAQ() {
     {
       topic: 'Cancellation',
       question: 'What is the cancellation policy and how does it work?',
-      answer: 'CozyCave provides a transparent 3-tier cancellation policy: (1) Cancellations made 7+ days before check-in receive a 100% refund of stay charges (only the service fee is retained). (2) Cancellations made between 7 days and 48 hours (2 days) prior to check-in receive a 50% refund (50% stay charges + service fee are retained). (3) Cancellations within 48 hours of check-in are non-refundable. Upon cancellation, the booked dates are automatically released and unblocked on the calendar immediately.'
+      answer: 'CozyCave provides a transparent 3-tier cancellation policy: (1) Cancellations made 7+ days before check-in receive a 100% refund of stay charges (only the service fee is retained). (2) Cancellations made between 7 days and 48 hours (2 days) prior to check-in receive a 50% refund (50% stay charges + service fee are retained). (3) Cancellations within 48 hours of check-in are non-refundable.'
     },
     {
       topic: 'Refunds',

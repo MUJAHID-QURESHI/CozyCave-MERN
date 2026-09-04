@@ -225,22 +225,6 @@ export default function CancellationPolicy() {
           </div>
         </div>
 
-        {/* Automatic Date Release & Unblock Highlight Card */}
-        <div className="bg-gradient-to-r from-forest/5 via-cream-deep/40 to-forest/5 border border-forest/20 rounded-2xl p-6 md:p-8 mb-12 shadow-sm">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
-            <div className="w-12 h-12 rounded-2xl bg-forest text-cream flex items-center justify-center shrink-0 shadow-sm">
-              <Calendar size={24} />
-            </div>
-            <div className="flex-1">
-              <h4 className="font-fraunces text-xl font-semibold text-forest-dark mb-1.5">
-                Instant Automatic Calendar Unblock
-              </h4>
-              <p className="text-[14px] text-charcoal-soft leading-relaxed">
-                When a reservation is cancelled either by the guest or by an administrator, the reserved dates are <strong>automatically released and unblocked instantly in our calendar database</strong>. There is no manual intervention needed by the host or admin; the dates become available immediately for new travelers to view and reserve.
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* Need Help / Support Helpline Card */}
         <div className="bg-white border border-line rounded-2xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
